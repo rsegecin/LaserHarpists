@@ -46,10 +46,6 @@ public class DeviceConnector {
         mBluetoothEvent = BLUETOOTH_EVENT.NONE;
     }
 
-    public void SetHandler(Handler handler) {
-        mHandler = handler;
-    }
-
     /**
      * Getting the status of the device
      */
@@ -300,10 +296,10 @@ public class DeviceConnector {
                     readMessage.append(readed);
 
                     // marker of the end of the team - to return a response in the main stream
-                    if (readed.contains("\n")) {
-                        mHandler.obtainMessage(BLUETOOTH_EVENT.READ.ordinal(), bytes, -1, readMessage.toString()).sendToTarget();
-                        readMessage.setLength(0);
-                    }
+                    //if (readed.contains("\n")) {
+                    mHandler.obtainMessage(BLUETOOTH_EVENT.READ.ordinal(), bytes, -1, readMessage.toString()).sendToTarget();
+                    readMessage.setLength(0);
+                    //}
 
                 } catch (IOException e) {
                     setState(BLUETOOTH_EVENT.CONNECTION_LOST);

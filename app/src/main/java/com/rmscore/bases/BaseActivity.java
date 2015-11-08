@@ -37,6 +37,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     public boolean PendingRequestBluetoothPermission = true;
     protected RMSService RmsService;
     protected boolean ServiceConnected = false;
+
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
@@ -58,10 +59,12 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     };
 
     public BaseActivity() {
-        Utils.log("BaseActivity started on " + (getClass().getName()));
+        Utils.log("Life cycle BaseActivity started on " + (getClass().getName()));
     }
 
     protected void UnbindService() {
+        Utils.log("Life cycle Service Disconnected at " + BaseActivity.this.getClass().getName());
+
         unbindService(this.rmsServiceConnection);
         ServiceConnected = false;
     }
@@ -69,6 +72,8 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Utils.log("Life cycle onCreate at " + getClass().getName());
 
         Intent intent = new Intent(this, RMSService.class);
         startService(intent);
@@ -96,29 +101,44 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     @Override
     public void onStart() {
         super.onStart();
+        Utils.log("Life cycle onStart at " + getClass().getName());
+
         if ((!(this instanceof Welcome)) && (RmsService != null) && (!RmsService.IsBluetoothConnected())) {
             finish();
         }
-        else if ((this instanceof Welcome) && (RmsService != null) && (PendingRequestBluetoothPermission)) {
-            MakeBluetoothHappen();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Utils.log("Life cycle onResume at " + getClass().getName());
+
+        if ((RmsService != null) && (RmsService.IsBluetoothConnected())) {
+            RmsService.SetNewBluetoothHandler(this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Utils.log("Life cycle onPause at " + getClass().getName());
+
+        if (RmsService != null)
+            RmsService.UnsetBluetoothHandler();
     }
 
     @Override
     protected void onDestroy() {
+        Utils.log("Life cycle onDestroy at " + getClass().getName());
         super.onDestroy();
-        RmsService.UnsetBluetoothHandler();
     }
 
     @Override
     public void ServiceStarted() {
-        if (RmsService.IsBluetoothConnected()) {
-            if (bluetoothHandler == null)
-                bluetoothHandler = new BluetoothHandler(BaseActivity.this);
-            else
-                bluetoothHandler.setTarget(BaseActivity.this);
+        Utils.log("Life cycle Service started at " + BaseActivity.this.getClass().getName());
 
-            RmsService.SetNewBluetoothHandler(bluetoothHandler);
+        if (RmsService.IsBluetoothConnected()) {
+            RmsService.SetNewBluetoothHandler(this);
         }
     }
 
@@ -218,7 +238,6 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
 
     @Override
     public void Read(String msg) {
-
     }
 
     @Override

@@ -4,8 +4,9 @@ import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.res.TypedArray;
+import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 
 import com.rmscore.bluetooth.BluetoothHandler;
@@ -17,10 +18,11 @@ import com.rmscore.utils.Utils;
 
 public class RMSService extends IntentService implements iBluetoothHandler {
 
-    private static BluetoothHandler bluetoothHandler;
-    private static DeviceConnector bluetoothConnector;
     private final IBinder mBinder = new LocalBinder();
     public String BluetoothDeviceName;
+    MediaPlayer[] key = new MediaPlayer[18];
+    private BluetoothHandler bluetoothHandler;
+    private DeviceConnector bluetoothConnector;
     private BluetoothAdapter bluetoothAdapter;
 
     public RMSService() {
@@ -31,12 +33,22 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     public void onCreate() {
         super.onCreate();
 
-        if (bluetoothHandler == null) bluetoothHandler = new BluetoothHandler(this);
-        else bluetoothHandler.setTarget(this);
+        if (bluetoothHandler == null)
+            bluetoothHandler = new BluetoothHandler(this);
+        else
+            bluetoothHandler.setTarget(this);
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             Utils.log(getString(R.string.bt_no_support));
+        }
+
+        TypedArray notes = getResources().obtainTypedArray(R.array.notes);
+        for (int i = 0; i < notes.length(); i++) {
+            int k = notes.getResourceId(i, -1);
+            if (k != -1) {
+                this.key[i] = MediaPlayer.create(this, k);
+            } else this.key[i] = null;
         }
     }
 
@@ -47,7 +59,6 @@ public class RMSService extends IntentService implements iBluetoothHandler {
 
     @Override
     public IBinder onBind(Intent intent) {
-        //return super.onBind(intent);
         return mBinder;
     }
 
@@ -105,12 +116,14 @@ public class RMSService extends IntentService implements iBluetoothHandler {
         }
     }
 
-    public void SetNewBluetoothHandler(Handler handler) {
-        bluetoothConnector.SetHandler(handler);
+    public void SetNewBluetoothHandler(iBluetoothHandler handler) {
+        bluetoothHandler.setTarget(handler);
     }
 
     public void UnsetBluetoothHandler() {
-        bluetoothConnector.SetHandler(bluetoothHandler);
+        if (bluetoothConnector != null) {
+            bluetoothHandler.setTarget(this);
+        }
     }
 
     public void SendToBluetooth(String message) {
@@ -126,10 +139,26 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
 
     }
+    //String btMessage = "";
 
     @Override
     public void Read(String msg) {
+        switch (msg.trim()) {
+            case "R":
+                playNote(key[1]);
+                break;
+            case "G":
+                playNote(key[2]);
+                break;
+            case "B":
+                playNote(key[3]);
+                break;
+        }
+    }
 
+    private void playNote(MediaPlayer mp) {
+        mp.seekTo(0);
+        mp.start();
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.rmscore.bluetooth;
 import android.os.Handler;
 import android.os.Message;
 
+import com.rmscore.utils.Utils;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -18,6 +20,8 @@ public class BluetoothHandler extends Handler {
     public void setTarget(iBluetoothHandler target) {
         mInterfaceHandler.clear();
         mInterfaceHandler = new WeakReference<>(target);
+
+        Utils.log("Life cycle Bluetooth targeted to " + target.getClass().getName());
     }
 
     @Override
@@ -27,6 +31,7 @@ public class BluetoothHandler extends Handler {
             DeviceConnector.BLUETOOTH_EVENT e = DeviceConnector.BLUETOOTH_EVENT.values()[msg.what];
             switch (e) {
                 case READ:
+                    //Utils.log("Bluetooth msg: " + msg);
                     interfaceHandler.Read((String) msg.obj);
                     interfaceHandler.BluetoothEvent(e);
                     break;

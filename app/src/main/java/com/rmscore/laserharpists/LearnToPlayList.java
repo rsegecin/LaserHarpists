@@ -2,16 +2,15 @@ package com.rmscore.laserharpists;
 
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-
 import com.rmscore.bases.BaseActivity;
 import com.rmscore.utils.SimpleArrayAdapter;
+
+import java.util.ArrayList;
 
 public class LearnToPlayList extends BaseActivity {
 
@@ -39,7 +38,7 @@ public class LearnToPlayList extends BaseActivity {
 
     @Override
     public void ServiceStarted() {
-
+        super.ServiceStarted();
     }
 
     public class OnMessageClicked implements AdapterView.OnItemClickListener {
