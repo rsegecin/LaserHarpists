@@ -16,10 +16,8 @@ import android.widget.Toast;
 
 import com.rmscore.RMSService;
 import com.rmscore.RMSService.LocalBinder;
-import com.rmscore.bluetooth.BluetoothHandler;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.DeviceListActivity;
-import com.rmscore.bluetooth.iBluetoothHandler;
 import com.rmscore.laserharpists.R;
 import com.rmscore.laserharpists.SettingsActivity;
 import com.rmscore.laserharpists.Welcome;
@@ -28,12 +26,11 @@ import com.rmscore.utils.Utils;
 /**
  * Created by Rinaldi on 03/11/2015.
  */
-public abstract class BaseActivity extends AppCompatActivity implements iBaseActivity, iBluetoothHandler {
+public abstract class BaseActivity extends AppCompatActivity implements iBaseActivity {
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
-    private static BluetoothHandler bluetoothHandler;
     public boolean PendingRequestBluetoothPermission = true;
     protected RMSService RmsService;
     protected boolean ServiceConnected = false;
@@ -112,19 +109,12 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     protected void onResume() {
         super.onResume();
         Utils.log("Life cycle onResume at " + getClass().getName());
-
-        if ((RmsService != null) && (RmsService.IsBluetoothConnected())) {
-            RmsService.SetNewBluetoothHandler(this);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Utils.log("Life cycle onPause at " + getClass().getName());
-
-        if (RmsService != null)
-            RmsService.UnsetBluetoothHandler();
     }
 
     @Override
@@ -136,10 +126,6 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     @Override
     public void ServiceStarted() {
         Utils.log("Life cycle Service started at " + BaseActivity.this.getClass().getName());
-
-        if (RmsService.IsBluetoothConnected()) {
-            RmsService.SetNewBluetoothHandler(this);
-        }
     }
 
     @Override
@@ -156,12 +142,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                 if (resultCode == Activity.RESULT_OK) {
                     String address = data.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     try {
-                        if (bluetoothHandler == null)
-                            bluetoothHandler = new BluetoothHandler(BaseActivity.this);
-                        else
-                            bluetoothHandler.setTarget(BaseActivity.this);
-
-                        RmsService.ConnectWithBluetooth(address, bluetoothHandler);
+                        RmsService.ConnectWithBluetooth(address);
 
                         showBluetoothState(RmsService.getBluetoothState());
                     } catch (Exception e) {
@@ -212,11 +193,6 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         }
     }
 
-    @Override
-    public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
-        showBluetoothState(bluetoothEvent);
-    }
-
     private void showBluetoothState(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
         switch (bluetoothEvent) {
             case NONE:
@@ -234,15 +210,6 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                 toast(getString(R.string.bt_device_connected));
                 break;
         }
-    }
-
-    @Override
-    public void Read(String msg) {
-    }
-
-    @Override
-    public void Written(String msg) {
-
     }
 
     protected void toast(String message) {

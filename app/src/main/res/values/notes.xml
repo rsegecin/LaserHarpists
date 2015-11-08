@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer-array name="notes">
-        <item>@raw/a1</item>
-        <!--<item >@raw/c4</item>-->
+        <item>@raw/c4</item>
         <item>@raw/d4</item>
         <item>@raw/e4</item>
         <item>@raw/f4</item>
@@ -20,6 +19,7 @@
         <item>@raw/ais4</item>
         <item>@raw/cis5</item>
         <item>@raw/dis5</item>
+        <item>@raw/a1</item>
     </integer-array>
 
 </resources>

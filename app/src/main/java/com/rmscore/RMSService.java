@@ -20,10 +20,11 @@ public class RMSService extends IntentService implements iBluetoothHandler {
 
     private final IBinder mBinder = new LocalBinder();
     public String BluetoothDeviceName;
-    MediaPlayer[] key = new MediaPlayer[18];
     private BluetoothHandler bluetoothHandler;
     private DeviceConnector bluetoothConnector;
     private BluetoothAdapter bluetoothAdapter;
+
+    private MediaPlayer[] key = new MediaPlayer[19];
 
     public RMSService() {
         super("RMSService");
@@ -100,14 +101,12 @@ public class RMSService extends IntentService implements iBluetoothHandler {
         }
     }
 
-    public void ConnectWithBluetooth(String address, BluetoothHandler bluetoothHandlerParam) throws Exception {
+    public void ConnectWithBluetooth(String address) throws Exception {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         if (IsBluetoothReady()) {
             DisconnectBluetooth();
             String emptyName = getString(R.string.bt_empty_device_name);
             DeviceData data = new DeviceData(device, emptyName);
-
-            bluetoothHandler = bluetoothHandlerParam;
 
             bluetoothConnector = new DeviceConnector(data, bluetoothHandler);
             bluetoothConnector.connect();
@@ -116,20 +115,11 @@ public class RMSService extends IntentService implements iBluetoothHandler {
         }
     }
 
-    public void SetNewBluetoothHandler(iBluetoothHandler handler) {
-        bluetoothHandler.setTarget(handler);
-    }
-
-    public void UnsetBluetoothHandler() {
-        if (bluetoothConnector != null) {
-            bluetoothHandler.setTarget(this);
-        }
-    }
-
     public void SendToBluetooth(String message) {
         if (message.isEmpty()) return;
         message += "\\r\\n";
         byte[] command = message.getBytes();
+
         if (IsBluetoothConnected()) {
             bluetoothConnector.write(command);
         }
@@ -139,7 +129,6 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
 
     }
-    //String btMessage = "";
 
     @Override
     public void Read(String msg) {
