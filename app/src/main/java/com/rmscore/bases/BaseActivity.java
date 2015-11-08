@@ -3,7 +3,6 @@ package com.rmscore.bases;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +16,10 @@ import android.widget.Toast;
 
 import com.rmscore.RMSService;
 import com.rmscore.RMSService.LocalBinder;
+import com.rmscore.bluetooth.BluetoothHandler;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.DeviceListActivity;
+import com.rmscore.bluetooth.iBluetoothHandler;
 import com.rmscore.laserharpists.R;
 import com.rmscore.laserharpists.SettingsActivity;
 import com.rmscore.laserharpists.Welcome;
@@ -27,18 +28,15 @@ import com.rmscore.utils.Utils;
 /**
  * Created by Rinaldi on 03/11/2015.
  */
-public abstract class BaseActivity extends AppCompatActivity implements iBaseActivity {
+public abstract class BaseActivity extends AppCompatActivity implements iBaseActivity, iBluetoothHandler {
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
-
+    private static BluetoothHandler bluetoothHandler;
     public boolean PendingRequestBluetoothPermission = true;
-    BroadcastReceiver sl;
-
     protected RMSService RmsService;
     protected boolean ServiceConnected = false;
-
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
@@ -59,21 +57,13 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         }
     };
 
-    protected BaseActivity() {
-        sl = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context arg0, Intent intent) {
-                String action = intent.getAction();
+    public BaseActivity() {
+        Utils.log("BaseActivity started on " + (getClass().getName()));
+    }
 
-                synchronized (BaseActivity.this) {
-                    if (action.equals(DeviceConnector.BLUETOOTH_INTENT_MANAGER)) {
-                        if (intent.getStringExtra(DeviceConnector.BLUETOOTH_EXTRA_MESSAGE) != null) {
-                            Interpreter(intent.getStringExtra(DeviceConnector.BLUETOOTH_EXTRA_MESSAGE));
-                        }
-                    }
-                }
-            }
-        };
+    protected void UnbindService() {
+        unbindService(this.rmsServiceConnection);
+        ServiceConnected = false;
     }
 
     @Override
@@ -115,8 +105,21 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RmsService.UnsetBluetoothHandler();
+    }
+
+    @Override
     public void ServiceStarted() {
-        MakeBluetoothHappen();
+        if (RmsService.IsBluetoothConnected()) {
+            if (bluetoothHandler == null)
+                bluetoothHandler = new BluetoothHandler(BaseActivity.this);
+            else
+                bluetoothHandler.setTarget(BaseActivity.this);
+
+            RmsService.SetNewBluetoothHandler(bluetoothHandler);
+        }
     }
 
     @Override
@@ -133,7 +136,14 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                 if (resultCode == Activity.RESULT_OK) {
                     String address = data.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     try {
-                        RmsService.ConnectWithBluetooth(address);
+                        if (bluetoothHandler == null)
+                            bluetoothHandler = new BluetoothHandler(BaseActivity.this);
+                        else
+                            bluetoothHandler.setTarget(BaseActivity.this);
+
+                        RmsService.ConnectWithBluetooth(address, bluetoothHandler);
+
+                        showBluetoothState(RmsService.getBluetoothState());
                     } catch (Exception e) {
                         showAlertDialog(e.getMessage());
                     }
@@ -146,7 +156,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                     Utils.log("BT enabled");
                 }
                 else {
-                    showAlertDialog(getString(R.string.app_needs_bluetooth));
+                    showAlertDialog(getString(R.string.bt_app_needs_bluetooth));
                     PendingRequestBluetoothPermission = false;
                 }
                 break;
@@ -167,7 +177,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
             if (RmsService.IsBluetoothReady()) {
                 if (RmsService.IsBluetoothConnected()) {
                     RmsService.DisconnectBluetooth();
-                    Toast.makeText(this, getString(R.string.bt_device_disconnected), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.bt_device_lost), Toast.LENGTH_SHORT).show();
                 }
                 else
                     startBluetoothDeviceListActivity();
@@ -178,19 +188,53 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
             }
         }
         else {
-            showAlertDialog(getString(R.string.no_bt_support));
+            showAlertDialog(getString(R.string.bt_no_support));
         }
     }
 
-    protected void UnbindService() {
-        unbindService(this.rmsServiceConnection);
-        ServiceConnected = false;
+    @Override
+    public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
+        showBluetoothState(bluetoothEvent);
+    }
+
+    private void showBluetoothState(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
+        switch (bluetoothEvent) {
+            case NONE:
+                break;
+            case CONNECTION_LOST:
+                toast(getString(R.string.bt_device_lost));
+                break;
+            case CONNECTION_FAILED:
+                toast(getString(R.string.bt_device_failed));
+                break;
+            case CONNECTING:
+                toast(getString(R.string.bt_device_connecting));
+                break;
+            case CONNECTED:
+                toast(getString(R.string.bt_device_connected));
+                break;
+        }
+    }
+
+    @Override
+    public void Read(String msg) {
+
+    }
+
+    @Override
+    public void Written(String msg) {
+
+    }
+
+    protected void toast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     protected void showAlertDialog(String message) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(getString(R.string.app_name));
         alertDialogBuilder.setMessage(message);
+        alertDialogBuilder.setPositiveButton("OK", null);
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }

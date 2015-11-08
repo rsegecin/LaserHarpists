@@ -74,24 +74,27 @@
 
     <!--Bluetooth-->
     <string name="select_device">Select device</string>
-    <string name="search_message">Search for devices…</string>
-    <string name="title_paired_devices">Paired devices</string>
-    <string name="title_other_devices">Other devices</string>
-    <string name="none_paired">No paired devices</string>
-    <string name="none_found">Not found</string>
-    <string name="command_hint">Enter command here</string>
-    <string name="button_send">Send</string>
-    <string name="empty_device_name">&lt;New device&gt;</string>
-    <string name="no_bt_support">Seu aparelho não suporta Bluetooth</string>
-    <string name="bt_device_disconnected">O aparelho foi desconectado do bluetooth.</string>
-    <string name="app_needs_bluetooth">Esta aplicação precisa de bluetooth</string>
+    <string name="bt_search_message">Search for devices…</string>
+    <string name="bt_title_paired_devices">Paired devices</string>
+    <string name="bt_title_other_devices">Other devices</string>
+    <string name="bt_none_paired">No paired devices</string>
+    <string name="bt_none_found">Not found</string>
+    <string name="bt_command_hint">Enter command here</string>
+    <string name="bt_button_send">Send</string>
+    <string name="bt_empty_device_name">&lt;New device&gt;</string>
+    <string name="bt_no_support">Your device doesn\'t support bluetooth</string>
+    <string name="bt_device_connecting">Connecting with bluetooth device</string>
+    <string name="bt_device_connected">Bluetooth device connected</string>
+    <string name="bt_device_failed">Couldn\'t connect with bluetooth device</string>
+    <string name="bt_device_lost">Bluetooth device disconnected</string>
+    <string name="bt_app_needs_bluetooth">This application needs bluetooth to function</string>
     <!--/Bluetooth-->
 
     <!--Harpa-->
     <string name="harp_cmd_prompt">areUharpa</string>
     <string name="harp_hand_shake">harpa</string>
-    <string name="not_harp">O dispositivo %s não é uma harpa.</string>
-    <string name="harp_connected">O harpa %s foi conectada.</string>
+    <string name="not_harp">The device %s isn\'t a harp.</string>
+    <string name="harp_connected">The harp %s was connected.</string>
     <!--/Harpa-->
 
 </resources>

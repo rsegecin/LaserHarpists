@@ -26,6 +26,16 @@ public class Utils {
     }
     // ============================================================================
 
+    /**
+     * The general method of output debugging messages to the log
+     */
+    public static void logError(String message) {
+        if (BuildConfig.DEBUG) {
+            if (message != null) Log.e(TAG, message);
+        }
+    }
+    // ============================================================================
+
 
     /**
      * Convert hex- string teams to display

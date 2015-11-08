@@ -3,66 +3,40 @@ package com.rmscore;
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 
+import com.rmscore.bluetooth.BluetoothHandler;
 import com.rmscore.bluetooth.DeviceConnector;
+import com.rmscore.bluetooth.iBluetoothHandler;
 import com.rmscore.datamodels.DeviceData;
 import com.rmscore.laserharpists.R;
 import com.rmscore.utils.Utils;
 
-public class RMSService extends IntentService {
+public class RMSService extends IntentService implements iBluetoothHandler {
 
-    public String BluetoothDeviceName;
-
-    private BroadcastReceiver sl;
-    private BluetoothAdapter bluetoothAdapter;
+    private static BluetoothHandler bluetoothHandler;
     private static DeviceConnector bluetoothConnector;
-
     private final IBinder mBinder = new LocalBinder();
-    public class LocalBinder extends Binder {
-        public RMSService getService() {
-            // Return this instance of SmartServices so clients can call public methods
-            return RMSService.this;
-        }
-    }
+    public String BluetoothDeviceName;
+    private BluetoothAdapter bluetoothAdapter;
 
     public RMSService() {
         super("RMSService");
-
-        sl = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context arg0, Intent intent) {
-                String action = intent.getAction();
-
-                synchronized (RMSService.this) {
-                    if (action.equals(DeviceConnector.BLUETOOTH_INTENT_MANAGER)) {
-                        if (intent.getStringExtra(DeviceConnector.BLUETOOTH_EXTRA_NAME) != null) {
-                            BluetoothDeviceName = intent.getStringExtra(DeviceConnector.BLUETOOTH_EXTRA_NAME);
-                        }
-                        else if (intent.getStringExtra(DeviceConnector.BLUETOOTH_EXTRA_STATE) != null) {
-                            String st = intent.getStringExtra(DeviceConnector.BLUETOOTH_EXTRA_NAME);
-                            if (st.equals(DeviceConnector.BLUETOOTH_STATUS_CONNECTED)) {
-                                String harp_cmd_prompt = getString(R.string.harp_cmd_prompt);
-                                SendToBluetooth(harp_cmd_prompt);
-                            }
-                        }
-                    }
-                }
-            }
-        };
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        if (bluetoothHandler == null) bluetoothHandler = new BluetoothHandler(this);
+        else bluetoothHandler.setTarget(this);
+
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            Utils.log(getString(R.string.no_bt_support));
+            Utils.log(getString(R.string.bt_no_support));
         }
     }
 
@@ -82,6 +56,16 @@ public class RMSService extends IntentService {
 
     }
 
+    /**
+     * Getting the status of the device
+     */
+    public DeviceConnector.BLUETOOTH_EVENT getBluetoothState() {
+        if (bluetoothConnector != null)
+            return bluetoothConnector.getState();
+        else
+            return null;
+    }
+
     public boolean HasBluetooth() {
         return (bluetoothAdapter != null);
     }
@@ -91,7 +75,10 @@ public class RMSService extends IntentService {
     }
 
     public boolean IsBluetoothConnected() {
-        return (bluetoothConnector != null) && (bluetoothConnector.getState() == DeviceConnector.STATE_CONNECTED);
+        return ((bluetoothConnector != null) &&
+                ((bluetoothConnector.getState() == DeviceConnector.BLUETOOTH_EVENT.CONNECTED) ||
+                        (bluetoothConnector.getState() == DeviceConnector.BLUETOOTH_EVENT.READ) ||
+                        (bluetoothConnector.getState() == DeviceConnector.BLUETOOTH_EVENT.WRITE)));
     }
 
     public void DisconnectBluetooth() {
@@ -102,18 +89,28 @@ public class RMSService extends IntentService {
         }
     }
 
-    public void ConnectWithBluetooth(String address) throws Exception {
+    public void ConnectWithBluetooth(String address, BluetoothHandler bluetoothHandlerParam) throws Exception {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         if (IsBluetoothReady()) {
             DisconnectBluetooth();
-            String emptyName = getString(R.string.empty_device_name);
+            String emptyName = getString(R.string.bt_empty_device_name);
             DeviceData data = new DeviceData(device, emptyName);
-            bluetoothConnector = new DeviceConnector(data, this);
+
+            bluetoothHandler = bluetoothHandlerParam;
+
+            bluetoothConnector = new DeviceConnector(data, bluetoothHandler);
             bluetoothConnector.connect();
-        }
-        else {
+        } else {
             throw new Exception("Habilite o uso do Bluetooth para a aplicação");
         }
+    }
+
+    public void SetNewBluetoothHandler(Handler handler) {
+        bluetoothConnector.SetHandler(handler);
+    }
+
+    public void UnsetBluetoothHandler() {
+        bluetoothConnector.SetHandler(bluetoothHandler);
     }
 
     public void SendToBluetooth(String message) {
@@ -122,6 +119,28 @@ public class RMSService extends IntentService {
         byte[] command = message.getBytes();
         if (IsBluetoothConnected()) {
             bluetoothConnector.write(command);
+        }
+    }
+
+    @Override
+    public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
+
+    }
+
+    @Override
+    public void Read(String msg) {
+
+    }
+
+    @Override
+    public void Written(String msg) {
+
+    }
+
+    public class LocalBinder extends Binder {
+        public RMSService getService() {
+            // Return this instance of SmartServices so clients can call public methods
+            return RMSService.this;
         }
     }
 }
