@@ -9,26 +9,17 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.rmscore.laserharpists.FreeStyle"
-    tools:showIn="@layout/activity_free_style">
-
-    <Spinner
-        android:id="@+id/spinnerSoundType"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="59dp" />
+    tools:context="com.rmscore.laserharpists.Pontuation"
+    tools:showIn="@layout/activity_pontuation">
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/spinnerSoundType"
-        android:layout_marginTop="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="38dp"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
         android:paddingBottom="10dp"
@@ -112,7 +103,7 @@
             android:src="@drawable/none" />
 
         <ImageView
-            android:id="@+id/imgFretEight"
+            android:id="@+id/imageView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/imgFretSeven"
@@ -124,45 +115,26 @@
 
     </LinearLayout>
 
-    <Spinner
-        android:id="@+id/spinnerRecords"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/linearLayout"
-        android:layout_marginTop="40dp" />
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="79dp"
+        android:text="Points"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/spinnerRecords"
+        android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="22dp"
-        android:orientation="horizontal">
-
-
-        <Button
-            android:id="@+id/btnPlay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:text="Play" />
-
-        <Button
-            android:id="@+id/btnStop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/btnPlay"
-            android:layout_marginLeft="27dp"
-            android:layout_marginStart="27dp"
-            android:layout_toEndOf="@+id/btnPlay"
-            android:layout_toRightOf="@+id/btnPlay"
-            android:text="Stop" />
-
-    </LinearLayout>
-
+        android:layout_marginTop="19dp"
+        android:text="135"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="40dp" />
 
 </RelativeLayout>

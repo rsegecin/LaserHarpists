@@ -5,5 +5,4 @@ package com.rmscore.bases;
  */
 public interface iBaseActivity {
     void ServiceStarted();
-    void Interpreter(String msg);
 }

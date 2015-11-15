@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.rmscore.bases.BaseActivity;
 import com.rmscore.bluetooth.BluetoothHandler;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.iBluetoothHandler;
@@ -20,10 +21,10 @@ public class RMSService extends IntentService implements iBluetoothHandler {
 
     private final IBinder mBinder = new LocalBinder();
     public String BluetoothDeviceName;
+    public BaseActivity CurrentActivity = null;
     private BluetoothHandler bluetoothHandler;
     private DeviceConnector bluetoothConnector;
     private BluetoothAdapter bluetoothAdapter;
-
     private MediaPlayer[] key = new MediaPlayer[19];
 
     public RMSService() {
@@ -68,16 +69,6 @@ public class RMSService extends IntentService implements iBluetoothHandler {
 
     }
 
-    /**
-     * Getting the status of the device
-     */
-    public DeviceConnector.BLUETOOTH_EVENT getBluetoothState() {
-        if (bluetoothConnector != null)
-            return bluetoothConnector.getState();
-        else
-            return null;
-    }
-
     public boolean HasBluetooth() {
         return (bluetoothAdapter != null);
     }
@@ -116,8 +107,11 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     }
 
     public void SendToBluetooth(String message) {
-        if (message.isEmpty()) return;
-        message += "\\r\\n";
+        if (message.isEmpty())
+            return;
+
+        message += "\r\n";
+
         byte[] command = message.getBytes();
 
         if (IsBluetoothConnected()) {
@@ -128,10 +122,29 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     @Override
     public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
 
+        if (CurrentActivity != null) {
+            CurrentActivity.BluetoothEvent(bluetoothEvent);
+        }
+
+        switch (bluetoothEvent) {
+            case NONE:
+                break;
+            case CONNECTION_LOST:
+                break;
+            case CONNECTION_FAILED:
+                break;
+            case CONNECTING:
+                break;
+            case CONNECTED:
+                break;
+        }
+
     }
 
     @Override
     public void Read(String msg) {
+        Utils.log("Bluetooth received: " + msg);
+
         switch (msg.trim()) {
             case "R":
                 playNote(key[1]);
@@ -145,14 +158,14 @@ public class RMSService extends IntentService implements iBluetoothHandler {
         }
     }
 
+    @Override
+    public void Written(String msg) {
+        Utils.log("Bluetooth sent: " + msg);
+    }
+
     private void playNote(MediaPlayer mp) {
         mp.seekTo(0);
         mp.start();
-    }
-
-    @Override
-    public void Written(String msg) {
-
     }
 
     public class LocalBinder extends Binder {

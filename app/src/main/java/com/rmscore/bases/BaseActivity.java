@@ -103,34 +103,43 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         if ((!(this instanceof Welcome)) && (RmsService != null) && (!RmsService.IsBluetoothConnected())) {
             finish();
         }
+
+        if (RmsService != null)
+            RmsService.CurrentActivity = this;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Utils.log("Life cycle onResume at " + getClass().getName());
+
+        if (RmsService != null)
+            RmsService.CurrentActivity = this;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Utils.log("Life cycle onPause at " + getClass().getName());
+
+        if (RmsService != null)
+            RmsService.CurrentActivity = null;
     }
 
     @Override
     protected void onDestroy() {
         Utils.log("Life cycle onDestroy at " + getClass().getName());
         super.onDestroy();
+
+        if (RmsService != null)
+            RmsService.CurrentActivity = null;
     }
 
     @Override
     public void ServiceStarted() {
         Utils.log("Life cycle Service started at " + BaseActivity.this.getClass().getName());
-    }
 
-    @Override
-    public void Interpreter(String msg) {
-
+        RmsService.CurrentActivity = this;
     }
 
     @Override
@@ -143,8 +152,6 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                     String address = data.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     try {
                         RmsService.ConnectWithBluetooth(address);
-
-                        showBluetoothState(RmsService.getBluetoothState());
                     } catch (Exception e) {
                         showAlertDialog(e.getMessage());
                     }
@@ -155,8 +162,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                 if (resultCode == Activity.RESULT_OK) {
                     startBluetoothDeviceListActivity();
                     Utils.log("BT enabled");
-                }
-                else {
+                } else {
                     showAlertDialog(getString(R.string.bt_app_needs_bluetooth));
                     PendingRequestBluetoothPermission = false;
                 }
@@ -179,26 +185,27 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                 if (RmsService.IsBluetoothConnected()) {
                     RmsService.DisconnectBluetooth();
                     Toast.makeText(this, getString(R.string.bt_device_lost), Toast.LENGTH_SHORT).show();
-                }
-                else
+                } else
                     startBluetoothDeviceListActivity();
             } else {
                 // Asks for bluetooth permission
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
-        }
-        else {
+        } else {
             showAlertDialog(getString(R.string.bt_no_support));
         }
     }
 
-    private void showBluetoothState(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
+    public void BluetoothEvent(DeviceConnector.BLUETOOTH_EVENT bluetoothEvent) {
         switch (bluetoothEvent) {
             case NONE:
                 break;
             case CONNECTION_LOST:
                 toast(getString(R.string.bt_device_lost));
+                if (!(this instanceof Welcome)) {
+                    finish();
+                }
                 break;
             case CONNECTION_FAILED:
                 toast(getString(R.string.bt_device_failed));
@@ -212,11 +219,11 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         }
     }
 
-    protected void toast(String message) {
+    public void toast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    protected void showAlertDialog(String message) {
+    public void showAlertDialog(String message) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(getString(R.string.app_name));
         alertDialogBuilder.setMessage(message);

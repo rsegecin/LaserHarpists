@@ -40,7 +40,6 @@
             <!-- <action android:name="android.intent.action.MAIN" /> -->
             <!-- </intent-filter> -->
         </activity>
-
         <activity
             android:name="com.rmscore.bluetooth.DeviceListActivity"
             android:label="@string/select_device"
@@ -51,6 +50,10 @@
             android:exported="false" >
         </service>
 
+        <activity
+            android:name=".Pontuation"
+            android:label="@string/title_activity_pontuation"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class DeviceConnector {
+
     private final BluetoothAdapter btAdapter;
     private final BluetoothDevice connectedDevice;
     private final String deviceName;
@@ -37,7 +38,6 @@ public class DeviceConnector {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private Handler mHandler;
-
     public DeviceConnector(DeviceData deviceData, Handler handler) {
         mHandler = handler;
         btAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -166,11 +166,7 @@ public class DeviceConnector {
             r = mConnectedThread;
         }
 
-        // Perform the write unsynchronized
-        if (data.length == 1)
-            r.write(data[0]);
-        else
-            r.writeData(data);
+        r.writeData(data);
     }
 
     public enum BLUETOOTH_EVENT {
@@ -319,26 +315,7 @@ public class DeviceConnector {
                 mmOutStream.write(chunk);
                 mmOutStream.flush();
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(BLUETOOTH_EVENT.WRITE.ordinal(), -1, -1, chunk).sendToTarget();
-            } catch (IOException e) {
-                Utils.logError("Bluetooth exception during write");
-            }
-        }
-        // ==========================================================================
-
-
-        /**
-         * Write bytes
-         */
-        public void write(byte command) {
-            byte[] buffer = new byte[1];
-            buffer[0] = command;
-
-            try {
-                mmOutStream.write(buffer);
-
-                // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(BLUETOOTH_EVENT.WRITE.ordinal(), -1, -1, buffer).sendToTarget();
+                mHandler.obtainMessage(BLUETOOTH_EVENT.WRITE.ordinal(), chunk.length, -1, new String(chunk)).sendToTarget();
             } catch (IOException e) {
                 Utils.logError("Bluetooth exception during write");
             }

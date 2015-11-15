@@ -1,15 +1,15 @@
 package com.rmscore.bluetooth;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.os.ParcelUuid;
+import android.util.Log;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.os.ParcelUuid;
-import android.util.Log;
 
 public class BluetoothUtils {
     private static final String TAG = "BluetoothUtils";
@@ -116,8 +116,8 @@ public class BluetoothUtils {
         ArrayList<ParcelUuid> result = new ArrayList<ParcelUuid>();
 
         try {
-            Method method = device.getClass().getMethod("getUuids", null);
-            ParcelUuid[] phoneUuids = (ParcelUuid[]) method.invoke(device, null);
+            Method method = device.getClass().getMethod("getUuids", (Class<?>) null);
+            ParcelUuid[] phoneUuids = (ParcelUuid[]) method.invoke(device, (Object[]) null);
             if (phoneUuids != null) {
                 for (ParcelUuid uuid : phoneUuids) {
                     if (D) Log.d(TAG, device.getName() + ": " + uuid.toString());

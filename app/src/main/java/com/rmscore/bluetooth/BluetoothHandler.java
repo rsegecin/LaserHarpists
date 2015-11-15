@@ -31,7 +31,6 @@ public class BluetoothHandler extends Handler {
             DeviceConnector.BLUETOOTH_EVENT e = DeviceConnector.BLUETOOTH_EVENT.values()[msg.what];
             switch (e) {
                 case READ:
-                    //Utils.log("Bluetooth msg: " + msg);
                     interfaceHandler.Read((String) msg.obj);
                     interfaceHandler.BluetoothEvent(e);
                     break;

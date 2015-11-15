@@ -63,19 +63,4 @@ public class Welcome extends BaseActivity {
             }
         });
     }
-
-    @Override
-    public void Interpreter(String msg) {
-        super.Interpreter(msg);
-
-        if (!msg.equals(getString(R.string.harp_hand_shake))) {
-            String not_harp = getString(R.string.not_harp);
-            showAlertDialog(String.format(not_harp, RmsService.BluetoothDeviceName));
-            RmsService.DisconnectBluetooth();
-        }
-        else {
-            String harp_connected = getString(R.string.harp_connected);
-            showAlertDialog(String.format(harp_connected, RmsService.BluetoothDeviceName));
-        }
-    }
 }
