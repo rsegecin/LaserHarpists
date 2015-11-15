@@ -1,5 +1,6 @@
 package com.rmscore.laserharpists;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -15,9 +16,9 @@ import java.util.ArrayList;
 
 public class FreeStyle extends BaseActivity {
 
+    boolean IsRecording = false;
     private ArrayList<String> Instrument = new ArrayList<>();
     private ArrayList<String> Records = new ArrayList<>();
-
     private Spinner spinnerSoundType;
     private Spinner spinnerRecords;
     private ImageView imgFretOne;
@@ -28,8 +29,7 @@ public class FreeStyle extends BaseActivity {
     private ImageView imgFretSix;
     private ImageView imgFretSeven;
     private ImageView imgFretEight;
-    private Button btnPlay;
-    private Button btnStop;
+    private Button btnRecord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,19 +101,28 @@ public class FreeStyle extends BaseActivity {
         imgFretSeven = (ImageView) findViewById(R.id.imgFretSeven);
         imgFretEight = (ImageView) findViewById(R.id.imgFretEight);
 
-        btnPlay = (Button) findViewById(R.id.btnPlay);
-        btnPlay.setOnClickListener(new View.OnClickListener() {
+        btnRecord = (Button) findViewById(R.id.btnRecord);
+        btnRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RmsService.SendToBluetooth("Yellowwww");
-            }
-        });
 
-        btnStop = (Button) findViewById(R.id.btnStop);
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RmsService.SendToBluetooth("Awww Morty what are you doing?");
+                if (!IsRecording) {
+                    IsRecording = true;
+                    btnRecord.setText("Recording");
+                    btnRecord.setBackgroundColor(0xFFDF3831);
+                    RmsService.SendToBluetooth("Yellowwww");
+                    imgFretOne.setImageResource(R.drawable.red);
+                    imgFretSix.setImageResource(R.drawable.red);
+                    imgFretEight.setImageResource(R.drawable.red);
+                } else {
+                    IsRecording = false;
+                    btnRecord.setText("Record");
+                    btnRecord.setBackgroundColor(Color.LTGRAY);
+                    RmsService.SendToBluetooth("Awww Morty what are you doing?");
+                    imgFretOne.setImageResource(R.drawable.none);
+                    imgFretSix.setImageResource(R.drawable.none);
+                    imgFretEight.setImageResource(R.drawable.none);
+                }
             }
         });
 

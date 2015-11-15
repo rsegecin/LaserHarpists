@@ -96,6 +96,7 @@
     <string name="not_harp">The device %s isn\'t a harp.</string>
     <string name="harp_connected">The harp %s was connected.</string>
     <string name="title_activity_pontuation">Pontuation</string>
+    <string name="title_activity_score_game">ScoreGame</string>
     <!--/Harpa-->
 
 </resources>

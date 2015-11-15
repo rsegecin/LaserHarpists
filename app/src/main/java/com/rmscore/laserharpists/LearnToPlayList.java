@@ -1,7 +1,7 @@
 package com.rmscore.laserharpists;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 public class LearnToPlayList extends BaseActivity {
 
+    public static final String MUSIC_CHOSEN = "MUSIC_CHOSEN";
     private ArrayList<String> MusicList = new ArrayList<>();
 
     @Override
@@ -44,7 +45,9 @@ public class LearnToPlayList extends BaseActivity {
     public class OnMessageClicked implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Snackbar.make(view, "Music Selected " + MusicList.get(position), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            Intent intent = new Intent(LearnToPlayList.this, ScoreGame.class);
+            intent.putExtra(MUSIC_CHOSEN, position);
+            startActivity(intent);
         }
     }
 }
