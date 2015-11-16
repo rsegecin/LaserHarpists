@@ -13,19 +13,24 @@ import com.rmscore.bases.BaseActivity;
 import com.rmscore.bluetooth.BluetoothHandler;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.iBluetoothHandler;
+import com.rmscore.data.DBTable;
+import com.rmscore.data.DataBaseManager;
 import com.rmscore.datamodels.DeviceData;
 import com.rmscore.laserharpists.R;
 import com.rmscore.utils.Utils;
 
+import java.util.ArrayList;
+
 public class RMSService extends IntentService implements iBluetoothHandler {
 
     private final IBinder mBinder = new LocalBinder();
-    public String BluetoothDeviceName;
     public BaseActivity CurrentActivity = null;
+    public DataBaseManager DBManager;
+    public String BluetoothDeviceName;
+    private MediaPlayer[] key = new MediaPlayer[19];
     private BluetoothHandler bluetoothHandler;
     private DeviceConnector bluetoothConnector;
     private BluetoothAdapter bluetoothAdapter;
-    private MediaPlayer[] key = new MediaPlayer[19];
 
     public RMSService() {
         super("RMSService");
@@ -67,6 +72,10 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     @Override
     protected void onHandleIntent(Intent intent) {
 
+    }
+
+    public void InitDBManager(ArrayList<DBTable> tablesParam) {
+        DBManager = new DataBaseManager(this, tablesParam);
     }
 
     public boolean HasBluetooth() {

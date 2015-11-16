@@ -58,8 +58,14 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
-    <string name="title_activity_wellcome">Laser Harpists</string>
     <!-- /Strings related to Settings -->
+
+    <!--Activities-->
+    <string name="title_activity_wellcome">Laser Harpists</string>
+    <string name="title_activity_learn_to_play_list">Learn To Play</string>
+    <string name="title_activity_score_game">Score Game</string>
+    <string name="title_activity_free_style">Free Style</string>
+    <!--/Activities-->
 
     <!--Menu-->
     <string name="menu_settings">Settings</string>
@@ -68,8 +74,6 @@
     <!--Welcome Activity-->
     <string name="btnLearnToPlayText">Learn To Play</string>
     <string name="btnFreeStyleText">Free Style</string>
-    <string name="title_activity_learn_to_play_list">Learn To Play</string>
-    <string name="title_activity_free_style">Free Style</string>
     <!--/Welcome Activity-->
 
     <!--Bluetooth-->
@@ -95,8 +99,7 @@
     <string name="harp_hand_shake">harpa</string>
     <string name="not_harp">The device %s isn\'t a harp.</string>
     <string name="harp_connected">The harp %s was connected.</string>
-    <string name="title_activity_pontuation">Pontuation</string>
-    <string name="title_activity_score_game">ScoreGame</string>
     <!--/Harpa-->
+
 
 </resources>
