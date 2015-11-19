@@ -13,9 +13,11 @@ public class DataBaseManager extends SQLiteOpenHelper {
 
     private ArrayList<DBTable> DBTables;
 
-    public DataBaseManager(Context context, ArrayList<DBTable> tablesParam) {
+    public DataBaseManager(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
 
+    public void SetDataTables(ArrayList<DBTable> tablesParam) {
         DBTables = tablesParam;
     }
 
@@ -43,7 +45,7 @@ public class DataBaseManager extends SQLiteOpenHelper {
     public DBTable GetTableByName(String nameParam) {
         DBTable tmpDBTable = null;
         for (DBTable dbTable : DBTables) {
-            if (dbTable.Name.equals(nameParam)) {
+            if (DBTable.Name.equals(nameParam)) {
                 tmpDBTable = dbTable;
             }
         }

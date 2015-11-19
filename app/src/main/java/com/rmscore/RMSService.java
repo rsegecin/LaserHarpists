@@ -4,8 +4,6 @@ import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 
@@ -13,24 +11,24 @@ import com.rmscore.bases.BaseActivity;
 import com.rmscore.bluetooth.BluetoothHandler;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.iBluetoothHandler;
-import com.rmscore.data.DBTable;
 import com.rmscore.data.DataBaseManager;
 import com.rmscore.datamodels.DeviceData;
 import com.rmscore.laserharpists.R;
 import com.rmscore.utils.Utils;
-
-import java.util.ArrayList;
 
 public class RMSService extends IntentService implements iBluetoothHandler {
 
     private final IBinder mBinder = new LocalBinder();
     public BaseActivity CurrentActivity = null;
     public DataBaseManager DBManager;
+    public MusicManager musicManager;
+
     public String BluetoothDeviceName;
-    private MediaPlayer[] key = new MediaPlayer[19];
     private BluetoothHandler bluetoothHandler;
     private DeviceConnector bluetoothConnector;
     private BluetoothAdapter bluetoothAdapter;
+
+    private BTInterpreter btInterpreter;
 
     public RMSService() {
         super("RMSService");
@@ -50,13 +48,13 @@ public class RMSService extends IntentService implements iBluetoothHandler {
             Utils.log(getString(R.string.bt_no_support));
         }
 
-        TypedArray notes = getResources().obtainTypedArray(R.array.notes);
-        for (int i = 0; i < notes.length(); i++) {
-            int k = notes.getResourceId(i, -1);
-            if (k != -1) {
-                this.key[i] = MediaPlayer.create(this, k);
-            } else this.key[i] = null;
-        }
+        btInterpreter = new BTInterpreter(this);
+
+        DBManager = new DataBaseManager(this); // DataBaseManager must be created before any other manager that uses DataBase
+
+        musicManager = new MusicManager(this);
+
+        DBManager.SetDataTables(musicManager.DBTables);
     }
 
     @Override
@@ -72,10 +70,6 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-    }
-
-    public void InitDBManager(ArrayList<DBTable> tablesParam) {
-        DBManager = new DataBaseManager(this, tablesParam);
     }
 
     public boolean HasBluetooth() {
@@ -154,27 +148,12 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     public void Read(String msg) {
         Utils.log("Bluetooth received: " + msg);
 
-        switch (msg.trim()) {
-            case "R":
-                playNote(key[1]);
-                break;
-            case "G":
-                playNote(key[2]);
-                break;
-            case "B":
-                playNote(key[3]);
-                break;
-        }
+        btInterpreter.ReadMessage(msg);
     }
 
     @Override
     public void Written(String msg) {
         Utils.log("Bluetooth sent: " + msg);
-    }
-
-    private void playNote(MediaPlayer mp) {
-        mp.seekTo(0);
-        mp.start();
     }
 
     public class LocalBinder extends Binder {

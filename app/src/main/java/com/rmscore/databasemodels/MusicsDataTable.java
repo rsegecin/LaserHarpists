@@ -1,11 +1,12 @@
-package com.rmscore.datamodels;
+package com.rmscore.databasemodels;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.rmscore.bases.BaseActivity;
+import com.rmscore.RMSService;
 import com.rmscore.data.DBRegister;
 import com.rmscore.data.DBTable;
+import com.rmscore.datamodels.MusicData;
 
 import java.util.ArrayList;
 
@@ -14,14 +15,15 @@ import java.util.ArrayList;
  */
 public class MusicsDataTable extends DBTable {
 
-    public MusicsDataTable(BaseActivity baseActivityParam) {
-        super(baseActivityParam);
+    public MusicsDataTable(RMSService rmsServiceParam) {
+        super(rmsServiceParam);
         Name = "Music";
 
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "id_music", true));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.TEXT, "name"));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.TEXT, "author"));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "instrument"));
+        AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "to_learn"));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.TEXT, "author_best_score"));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "best_score"));
     }
@@ -30,13 +32,30 @@ public class MusicsDataTable extends DBTable {
         ContentValues cv;
 
         if ((!musicDataParam.Name.isEmpty()) && (!musicDataParam.Author.isEmpty()) && (musicDataParam.Instrument != 0)) {
-            cv = new ContentValues();
-            cv.put("name", musicDataParam.Name);
-            cv.put("author", musicDataParam.Author);
-            cv.put("instrument", musicDataParam.Instrument);
-            db.insert(Name, null, cv);
+            if (musicDataParam.Notes.size() > 0) {
+                long lastId;
+                cv = new ContentValues();
+                cv.put("name", musicDataParam.Name);
+                cv.put("author", musicDataParam.Author);
+                cv.put("instrument", musicDataParam.Instrument);
+                cv.put("to_learn", musicDataParam.ToLearn);
+                lastId = db.insert(Name, null, cv);
 
-            db.close();
+                for (int i = 0; i < musicDataParam.Notes.size(); i++) {
+                    cv = new ContentValues();
+                    cv.put("id_music", lastId);
+                    cv.put("chord", musicDataParam.Notes.get(i).Chord);
+                    cv.put("height", musicDataParam.Notes.get(i).Height);
+                    cv.put("start_time", musicDataParam.Notes.get(i).StartTime);
+                    cv.put("end_time", musicDataParam.Notes.get(i).EndTime);
+
+                    db.insert(NotesDataTable.Name, null, cv);
+                }
+
+                db.close();
+            } else {
+                throw new Exception("The music hasn't any notes.");
+            }
         } else {
             throw new Exception("Insert music name, who's the author to create music and the instrument played.");
         }
@@ -57,6 +76,7 @@ public class MusicsDataTable extends DBTable {
             cv.put("instrument", musicDataParam.Instrument);
             cv.put("author_best_score", musicDataParam.AuthorsBestScore);
             cv.put("best_score", musicDataParam.BestScore);
+            cv.put("to_learn", musicDataParam.ToLearn);
             db.update(Name, cv, "id_music=?",
                     new String[]{String.valueOf(musicDataParam.ID)});
 
@@ -67,8 +87,8 @@ public class MusicsDataTable extends DBTable {
     }
 
     public ArrayList<MusicData> GetMusics() {
-        ArrayList<MusicData> musics = new ArrayList<MusicData>();
-        Cursor cursor = db.rawQuery(baseActivity.RmsService.DBManager.GetTableByName(Name).GetSelectQuery(), null);
+        ArrayList<MusicData> musics = new ArrayList<>();
+        Cursor cursor = db.rawQuery(rmsService.DBManager.GetTableByName(Name).GetSelectQuery(), null);
 
         if ((cursor != null) && (cursor.moveToFirst())) {
             do {
@@ -77,8 +97,30 @@ public class MusicsDataTable extends DBTable {
                 music.Name = cursor.getString(1);
                 music.Author = cursor.getString(2);
                 music.Instrument = Integer.valueOf(cursor.getString(3));
-                music.AuthorsBestScore = cursor.getString(4);
-                music.BestScore = Double.valueOf(cursor.getString(5));
+                music.ToLearn = Integer.valueOf(cursor.getString(4));
+                music.AuthorsBestScore = cursor.getString(5);
+                music.BestScore = Double.valueOf(cursor.getString(6));
+                musics.add(music);
+            } while (cursor.moveToNext());
+        }
+
+        return musics;
+    }
+
+    public ArrayList<MusicData> GetMusicsToLearn() {
+        ArrayList<MusicData> musics = new ArrayList<>();
+        Cursor cursor = db.rawQuery("Select * From " + Name + " Where to_learn = 1", null);
+
+        if ((cursor != null) && (cursor.moveToFirst())) {
+            do {
+                MusicData music = new MusicData();
+                music.ID = Integer.valueOf(cursor.getString(0));
+                music.Name = cursor.getString(1);
+                music.Author = cursor.getString(2);
+                music.Instrument = Integer.valueOf(cursor.getString(3));
+                music.ToLearn = Integer.valueOf(cursor.getString(4));
+                music.AuthorsBestScore = cursor.getString(5);
+                music.BestScore = Double.valueOf(cursor.getString(6));
                 musics.add(music);
             } while (cursor.moveToNext());
         }
@@ -95,5 +137,15 @@ public class MusicsDataTable extends DBTable {
         }
 
         return strMusics;
+    }
+
+    public int GetIDForNewMusic() {
+        Cursor cursor = db.rawQuery("Select Max(id_music) from " + Name, null);
+
+        if ((cursor != null) && (cursor.moveToFirst())) {
+            return Integer.valueOf(cursor.getString(0)) + 1;
+        }
+
+        return 1;
     }
 }

@@ -18,15 +18,10 @@ import com.rmscore.RMSService;
 import com.rmscore.RMSService.LocalBinder;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.DeviceListActivity;
-import com.rmscore.data.DBTable;
-import com.rmscore.datamodels.MusicsDataTable;
-import com.rmscore.datamodels.NotesTable;
 import com.rmscore.laserharpists.R;
 import com.rmscore.laserharpists.SettingsActivity;
 import com.rmscore.laserharpists.Welcome;
 import com.rmscore.utils.Utils;
-
-import java.util.ArrayList;
 
 /**
  * Created by Rinaldi on 03/11/2015.
@@ -145,11 +140,6 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         Utils.log("Life cycle Service started at " + BaseActivity.this.getClass().getName());
 
         RmsService.CurrentActivity = this;
-
-        ArrayList<DBTable> DBTables = new ArrayList<>();
-        DBTables.add(new MusicsDataTable(this));
-        DBTables.add(new NotesTable(this));
-        RmsService.InitDBManager(DBTables);
     }
 
     @Override

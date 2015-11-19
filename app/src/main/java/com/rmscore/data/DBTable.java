@@ -2,24 +2,24 @@ package com.rmscore.data;
 
 import android.database.sqlite.SQLiteDatabase;
 
-import com.rmscore.bases.BaseActivity;
+import com.rmscore.RMSService;
 
 import java.util.ArrayList;
 
 public class DBTable {
 
-    public String Name;
-    protected BaseActivity baseActivity;
+    public static String Name;
+    protected RMSService rmsService;
     protected SQLiteDatabase db;
     private ArrayList<DBRegister> Registers;
     private ArrayList<DBTable> ForeignTables;
 
-    public DBTable(BaseActivity baseActivityParam) {
+    public DBTable(RMSService rmsServiceParam) {
         Registers = new ArrayList<>();
         ForeignTables = new ArrayList<>();
-        baseActivity = baseActivityParam;
+        rmsService = rmsServiceParam;
 
-        db = baseActivity.RmsService.DBManager.getWritableDatabase();
+        db = rmsService.DBManager.getWritableDatabase();
     }
 
     public DBRegister GetPrimaryKey() {
@@ -88,25 +88,25 @@ public class DBTable {
 
         for (int i = 0; i < Registers.size(); i++) {
             if (i == 0)
-                strQuery += " " + this.Name + "." + Registers.get(i).Name;
+                strQuery += " " + Name + "." + Registers.get(i).Name;
             else
-                strQuery += ", " + this.Name + "." + Registers.get(i).Name;
+                strQuery += ", " + Name + "." + Registers.get(i).Name;
         }
 
         for (int i = 0; i < ForeignTables.size(); i++) {
             for (int j = 0; j < ForeignTables.get(i).Registers.size(); j++) {
                 if ((ForeignTables.get(i).Registers.get(j).ForeignTable == null) ||
-                        (ForeignTables.get(i).Registers.get(j).ForeignTable.Name != this.Name))
+                        (ForeignTables.get(i).Registers.get(j).ForeignTable.Name != Name))
                     strQuery += ", " + ForeignTables.get(i).Name + "." +
                             ForeignTables.get(i).Registers.get(j).Name;
             }
         }
 
-        strQuery += " From " + this.Name;
+        strQuery += " From " + Name;
 
         for (int i = 0; i < ForeignTables.size(); i++) {
             strQuery += " Left Join " + ForeignTables.get(i).Name + " On ";
-            strQuery += this.Name + "." + primaryKey.Name + " = ";
+            strQuery += Name + "." + primaryKey.Name + " = ";
             strQuery += ForeignTables.get(i).Name + "." + primaryKey.Name;
         }
 

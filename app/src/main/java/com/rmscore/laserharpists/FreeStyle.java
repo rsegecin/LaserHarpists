@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 public class FreeStyle extends BaseActivity {
 
-    boolean IsRecording = false;
     private ArrayList<String> Instrument = new ArrayList<>();
     private ArrayList<String> Records = new ArrayList<>();
     private Spinner spinnerSoundType;
@@ -106,22 +105,20 @@ public class FreeStyle extends BaseActivity {
             @Override
             public void onClick(View v) {
 
-                if (!IsRecording) {
-                    IsRecording = true;
+                if (!RmsService.musicManager.IsRecording) {
+                    RmsService.musicManager.StartRecording(spinnerSoundType.getSelectedItemPosition());
                     btnRecord.setText("Recording");
                     btnRecord.setBackgroundColor(0xFFDF3831);
-                    RmsService.SendToBluetooth("Yellowwww");
-                    imgFretOne.setImageResource(R.drawable.red);
-                    imgFretSix.setImageResource(R.drawable.red);
-                    imgFretEight.setImageResource(R.drawable.red);
+//                    RmsService.SendToBluetooth("Yellowwww");
+//                    imgFretOne.setImageResource(R.drawable.red);
+
+
                 } else {
-                    IsRecording = false;
+                    RmsService.musicManager.StopRecording();
                     btnRecord.setText("Record");
                     btnRecord.setBackgroundColor(Color.LTGRAY);
-                    RmsService.SendToBluetooth("Awww Morty what are you doing?");
-                    imgFretOne.setImageResource(R.drawable.none);
-                    imgFretSix.setImageResource(R.drawable.none);
-                    imgFretEight.setImageResource(R.drawable.none);
+//                    RmsService.SendToBluetooth("Awww Morty what are you doing?");
+//                    imgFretOne.setImageResource(R.drawable.none);
                 }
             }
         });

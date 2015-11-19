@@ -1,20 +1,22 @@
-package com.rmscore.datamodels;
+package com.rmscore.databasemodels;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.rmscore.bases.BaseActivity;
+import com.rmscore.RMSService;
 import com.rmscore.data.DBRegister;
 import com.rmscore.data.DBTable;
+import com.rmscore.datamodels.MusicData;
+import com.rmscore.datamodels.NoteData;
 
 import java.util.ArrayList;
 
 /**
  * Created by Rinaldi on 16/11/2015.
  */
-public class NotesTable extends DBTable {
-    public NotesTable(BaseActivity baseActivityParam) {
-        super(baseActivityParam);
+public class NotesDataTable extends DBTable {
+    public NotesDataTable(RMSService rmsServiceParam) {
+        super(rmsServiceParam);
         Name = "Notes";
 
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "id_note", true));

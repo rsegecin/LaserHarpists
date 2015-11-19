@@ -8,6 +8,6 @@ public class NoteData {
     public int MusicID;
     public int Chord;
     public double Height;
-    public int StartTime;
-    public int EndTime;
+    public long StartTime;
+    public long EndTime;
 }
