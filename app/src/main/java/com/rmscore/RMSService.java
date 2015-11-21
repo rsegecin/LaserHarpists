@@ -9,11 +9,13 @@ import android.os.IBinder;
 
 import com.rmscore.bases.BaseActivity;
 import com.rmscore.bluetooth.BluetoothHandler;
+import com.rmscore.bluetooth.BluetoothInterpreter;
 import com.rmscore.bluetooth.DeviceConnector;
 import com.rmscore.bluetooth.iBluetoothHandler;
 import com.rmscore.data.DataBaseManager;
 import com.rmscore.datamodels.DeviceData;
 import com.rmscore.laserharpists.R;
+import com.rmscore.music.MusicManager;
 import com.rmscore.utils.Utils;
 
 public class RMSService extends IntentService implements iBluetoothHandler {
@@ -28,7 +30,7 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     private DeviceConnector bluetoothConnector;
     private BluetoothAdapter bluetoothAdapter;
 
-    private BTInterpreter btInterpreter;
+    private BluetoothInterpreter bluetoothInterpreter;
 
     public RMSService() {
         super("RMSService");
@@ -48,7 +50,7 @@ public class RMSService extends IntentService implements iBluetoothHandler {
             Utils.log(getString(R.string.bt_no_support));
         }
 
-        btInterpreter = new BTInterpreter(this);
+        bluetoothInterpreter = new BluetoothInterpreter(this);
 
         DBManager = new DataBaseManager(this); // DataBaseManager must be created before any other manager that uses DataBase
 
@@ -148,7 +150,7 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     public void Read(String msg) {
         Utils.log("Bluetooth received: " + msg);
 
-        btInterpreter.ReadMessage(msg);
+        bluetoothInterpreter.ReadMessage(msg);
     }
 
     @Override

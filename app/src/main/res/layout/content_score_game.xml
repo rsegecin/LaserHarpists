@@ -34,7 +34,7 @@
             android:layout_below="@+id/spinnerSoundType"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imgFretTwo"
@@ -45,7 +45,7 @@
             android:layout_toRightOf="@+id/imgFretOne"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imgFretThree"
@@ -56,7 +56,7 @@
             android:layout_toRightOf="@+id/imgFretTwo"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imgFretFour"
@@ -67,7 +67,7 @@
             android:layout_toRightOf="@+id/imgFretThree"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imgFretFive"
@@ -78,7 +78,7 @@
             android:layout_toRightOf="@+id/imgFretFour"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imgFretSix"
@@ -89,7 +89,7 @@
             android:layout_toRightOf="@+id/imgFretFive"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imgFretSeven"
@@ -100,7 +100,7 @@
             android:layout_toRightOf="@+id/imgFretSix"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
         <ImageView
             android:id="@+id/imageView8"
@@ -111,7 +111,7 @@
             android:layout_toRightOf="@+id/imgFretSeven"
             android:adjustViewBounds="true"
             android:maxWidth="40dp"
-            android:src="@drawable/none" />
+            android:src="@drawable/blankfret" />
 
     </LinearLayout>
 

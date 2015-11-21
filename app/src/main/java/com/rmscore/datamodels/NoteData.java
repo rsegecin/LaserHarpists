@@ -10,4 +10,9 @@ public class NoteData {
     public double Height;
     public long StartTime;
     public long EndTime;
+    public eNoteDirection NoteDirection = eNoteDirection.none;
+
+    public enum eNoteDirection {
+        none, Input, Output
+    }
 }
