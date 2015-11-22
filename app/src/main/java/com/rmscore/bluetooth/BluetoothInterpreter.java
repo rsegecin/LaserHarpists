@@ -25,15 +25,17 @@ public class BluetoothInterpreter {
 
         message += msg;
 
-        pattern = Pattern.compile("(([A-H])(i|o)(\\d{2}|\\d{1}),)+");
+        //Do34
+        pattern = Pattern.compile("([A-H])(i|o)(\\d{2}|\\d{1})");
         matcher = pattern.matcher(message);
 
         while (matcher.find()) {
             NoteData noteData = new NoteData();
-            noteData.Chord = Integer.valueOf(matcher.group(1)) - 17; // ASCii 'A'(65) - '0'(48) = 17
-            noteData.NoteDirection = (matcher.group(2) == "i") ? NoteData.eNoteDirection.Input : NoteData.eNoteDirection.Output;
+            noteData.Chord = ((int) matcher.group(1).charAt(0)) - ((int) 'A');
+            noteData.NoteDirection = (matcher.group(2).charAt(0) == 'i') ? NoteData.eNoteDirection.Input : NoteData.eNoteDirection.Output;
             noteData.Height = Integer.valueOf(matcher.group(3));
             rmsService.musicManager.onNoteReceived(noteData);
+            message = message.substring(matcher.group(0).length() + matcher.start(), message.length());
         }
     }
 

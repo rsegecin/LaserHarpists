@@ -96,7 +96,8 @@ public class Chronometer extends LinearLayout {
     }
 
     public void reset() {
-        updateText(0);
+        txtChronus.setText("00:00");
+        txtMilliseconds.setText(".0");
         stop();
     }
 
@@ -145,7 +146,7 @@ public class Chronometer extends LinearLayout {
         text += df.format(seconds);
 
         txtChronus.setText(text);
-        txtMilliseconds.setText(milliseconds);
+        txtMilliseconds.setText("." + String.valueOf(milliseconds));
     }
 
     private void updateRunning() {

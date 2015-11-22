@@ -39,6 +39,7 @@ public class RMSService extends IntentService implements iBluetoothHandler {
     @Override
     public void onCreate() {
         super.onCreate();
+        Utils.log("Service Created");
 
         if (bluetoothHandler == null)
             bluetoothHandler = new BluetoothHandler(this);
@@ -52,11 +53,13 @@ public class RMSService extends IntentService implements iBluetoothHandler {
 
         bluetoothInterpreter = new BluetoothInterpreter(this);
 
-        DBManager = new DataBaseManager(this); // DataBaseManager must be created before any other manager that uses DataBase
-
         musicManager = new MusicManager(this);
 
-        DBManager.SetDataTables(musicManager.DBTables);
+        DBManager = new DataBaseManager(this, musicManager.DBTables); // DataBaseManager must be created after any other manager that uses DataBase
+
+        for (int i = 0; i < musicManager.DBTables.size(); i++) {
+            musicManager.DBTables.get(i).SetDB(DBManager.getWritableDatabase());
+        }
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.ArrayList;
  * Created by Rinaldi on 16/11/2015.
  */
 public class NotesDataTable extends DBTable {
+
     public NotesDataTable(RMSService rmsServiceParam) {
         super(rmsServiceParam);
         Name = "Notes";
@@ -38,8 +39,6 @@ public class NotesDataTable extends DBTable {
             cv.put("start_time", noteDataParam.StartTime);
             cv.put("end_time", noteDataParam.EndTime);
             db.insert(Name, null, cv);
-
-            db.close();
         } else {
             throw new Exception("The Note must belong to some music.");
         }
@@ -47,7 +46,6 @@ public class NotesDataTable extends DBTable {
 
     public void DeleteNotes(MusicData musicDataParam) throws Exception {
         db.delete(Name, "id_music = ?", new String[]{String.valueOf(musicDataParam.ID)});
-        db.close();
     }
 
     public ArrayList<NoteData> GetNotes(MusicData musicDataParam) {

@@ -44,13 +44,13 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         setContentView(R.layout.activity_free_style);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        InitLayout();
     }
 
     @Override
     public void ServiceStarted() {
         super.ServiceStarted();
+
+        InitLayout();
     }
 
     private void InitLayout() {
@@ -86,6 +86,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         chronometer = (Chronometer) findViewById(R.id.chronometer);
 
         btnMusicAction = (Button) findViewById(R.id.btnMusicAction);
+        btnMusicAction.setBackgroundColor(Color.LTGRAY);
         btnMusicAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +99,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
                     } else {
                         RmsService.musicManager.StopMusic();
                         btnMusicAction.setText("Play");
-                        chronometer.stop();
+                        chronometer.reset();
                     }
                 } else {
                     showAlertDialog("Cannot play music while recording.");
@@ -107,6 +108,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         });
 
         btnRecord = (Button) findViewById(R.id.btnRecord);
+        btnRecord.setBackgroundColor(Color.LTGRAY);
         btnRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,6 +127,8 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
                     btnRecord.setText("Record");
                     btnRecord.setBackgroundColor(Color.LTGRAY);
                     chronometer.reset();
+
+                    UpdateSpinnerRecords();
                 }
             }
         });

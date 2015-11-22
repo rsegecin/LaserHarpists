@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by Rinaldi on 16/11/2015.
  */
 public class MusicData {
-    public int ID;
+    public long ID;
     public String Name;
     public String Author;
     public String AuthorsBestScore;

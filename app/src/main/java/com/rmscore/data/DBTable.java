@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class DBTable {
 
-    public static String Name;
+    public String Name;
     protected RMSService rmsService;
     protected SQLiteDatabase db;
     private ArrayList<DBRegister> Registers;
@@ -18,8 +18,10 @@ public class DBTable {
         Registers = new ArrayList<>();
         ForeignTables = new ArrayList<>();
         rmsService = rmsServiceParam;
+    }
 
-        db = rmsService.DBManager.getWritableDatabase();
+    public void SetDB(SQLiteDatabase dbParam) {
+        db = dbParam;
     }
 
     public DBRegister GetPrimaryKey() {

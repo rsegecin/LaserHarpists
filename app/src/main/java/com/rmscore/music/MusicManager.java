@@ -63,14 +63,14 @@ public class MusicManager {
 
         if ((IsRecording) && (musicData != null)) {
             if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
+                NoteTracking.get(noteData.Chord).Chord = noteData.Chord;
+                NoteTracking.get(noteData.Chord).Height = noteData.Height;
                 NoteTracking.get(noteData.Chord).StartTime = System.currentTimeMillis() - startMilliseconds;
                 playNote(noteData);
-            }
-            if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) &&
+            } else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) &&
                     (NoteTracking.get(noteData.Chord).StartTime != -1)) {
                 NoteTracking.get(noteData.Chord).EndTime = System.currentTimeMillis() - startMilliseconds;
-
-                musicData.Notes.add(noteData);
+                musicData.Notes.add(new NoteData(NoteTracking.get(noteData.Chord)));
                 NoteTracking.get(noteData.Chord).StartTime = -1;
             }
             if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
@@ -97,13 +97,19 @@ public class MusicManager {
     }
 
     public void StopRecording() throws Exception {
+        IsRecording = false;
+
         if (musicData != null) {
-            musicsDataTable.AddMusic(musicData);
+            long music_id = musicsDataTable.AddMusic(musicData);
+
+            for (int i = 0; i < musicData.Notes.size(); i++) {
+                musicData.Notes.get(i).MusicID = music_id;
+                notesDataTable.AddNote(musicData.Notes.get(i));
+            }
+
             musicData.Notes.clear();
             musicData = null;
         }
-
-        IsRecording = false;
     }
 
     public void PlayMusic(MusicData musicDataParam) {
@@ -117,8 +123,8 @@ public class MusicManager {
     }
 
     public void StopMusic() {
-        IsPlaying = false;
         if (IsPlaying) {
+            IsPlaying = false;
             playNoteTimer.cancel();
             playNoteTimer.purge();
         }

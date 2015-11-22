@@ -28,42 +28,30 @@ public class MusicsDataTable extends DBTable {
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "best_score"));
     }
 
-    public void AddMusic(MusicData musicDataParam) throws Exception {
+    public long AddMusic(MusicData musicDataParam) throws Exception {
         ContentValues cv;
+        long lastId;
 
-        if ((!musicDataParam.Name.isEmpty()) && (!musicDataParam.Author.isEmpty()) && (musicDataParam.Instrument != 0)) {
+        if (!musicDataParam.Name.isEmpty()) {
             if (musicDataParam.Notes.size() > 0) {
-                long lastId;
                 cv = new ContentValues();
                 cv.put("name", musicDataParam.Name);
                 cv.put("author", musicDataParam.Author);
                 cv.put("instrument", musicDataParam.Instrument);
                 cv.put("to_learn", musicDataParam.ToLearn);
                 lastId = db.insert(Name, null, cv);
-
-                for (int i = 0; i < musicDataParam.Notes.size(); i++) {
-                    cv = new ContentValues();
-                    cv.put("id_music", lastId);
-                    cv.put("chord", musicDataParam.Notes.get(i).Chord);
-                    cv.put("height", musicDataParam.Notes.get(i).Height);
-                    cv.put("start_time", musicDataParam.Notes.get(i).StartTime);
-                    cv.put("end_time", musicDataParam.Notes.get(i).EndTime);
-
-                    db.insert(NotesDataTable.Name, null, cv);
-                }
-
-                db.close();
             } else {
                 throw new Exception("The music hasn't any notes.");
             }
         } else {
             throw new Exception("Insert music name, who's the author to create music and the instrument played.");
         }
+
+        return lastId;
     }
 
     public void DeleteMusic(MusicData musicDataParam) throws Exception {
         db.delete(Name, "id_music = ?", new String[]{String.valueOf(musicDataParam.ID)});
-        db.close();
     }
 
     public void UpdateMusic(MusicData musicDataParam) throws Exception {
@@ -79,8 +67,6 @@ public class MusicsDataTable extends DBTable {
             cv.put("to_learn", musicDataParam.ToLearn);
             db.update(Name, cv, "id_music=?",
                     new String[]{String.valueOf(musicDataParam.ID)});
-
-            db.close();
         } else {
             throw new Exception("Insert music name, who's the author to create music and the instrument played.");
         }
@@ -99,7 +85,8 @@ public class MusicsDataTable extends DBTable {
                 music.Instrument = Integer.valueOf(cursor.getString(3));
                 music.ToLearn = Integer.valueOf(cursor.getString(4));
                 music.AuthorsBestScore = cursor.getString(5);
-                music.BestScore = Double.valueOf(cursor.getString(6));
+                if ((cursor.getString(6) != null) && (!cursor.getString(6).isEmpty()))
+                    music.BestScore = Double.valueOf(cursor.getString(6));
                 musics.add(music);
             } while (cursor.moveToNext());
         }
@@ -143,7 +130,8 @@ public class MusicsDataTable extends DBTable {
         Cursor cursor = db.rawQuery("Select Max(id_music) from " + Name, null);
 
         if ((cursor != null) && (cursor.moveToFirst())) {
-            return Integer.valueOf(cursor.getString(0)) + 1;
+            if (cursor.getString(0) != null)
+                return Integer.valueOf(cursor.getString(0)) + 1;
         }
 
         return 1;
