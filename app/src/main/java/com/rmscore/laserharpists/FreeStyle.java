@@ -3,12 +3,17 @@ package com.rmscore.laserharpists;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
@@ -34,6 +39,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
     private ImageView imgFretSix;
     private ImageView imgFretSeven;
     private ImageView imgFretEight;
+    private Button btnEdit;
     private Button btnMusicAction;
     private Button btnRecord;
     private Chronometer chronometer;
@@ -63,7 +69,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         spinnerSoundType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+                FreeStyle.this.RmsService.musicManager.InstrumentSelected = position;
             }
 
             @Override
@@ -85,21 +91,40 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
 
         chronometer = (Chronometer) findViewById(R.id.chronometer);
 
+        btnEdit = (Button) findViewById(R.id.btnEdit);
+        ButtonSetColor(R.id.btnEdit, Color.LTGRAY);
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (spinnerRecords.getSelectedItemPosition() > 0) {
+                    MusicData music = Musics.get(spinnerRecords.getSelectedItemPosition() - 1);
+                    MessageDialog messageDialog = new MessageDialog(FreeStyle.this, music);
+                    messageDialog.show();
+                } else {
+                    showAlertDialog("Select a music to be edited.");
+                }
+            }
+        });
+
         btnMusicAction = (Button) findViewById(R.id.btnMusicAction);
-        btnMusicAction.setBackgroundColor(Color.LTGRAY);
+        ButtonSetColor(R.id.btnMusicAction, Color.LTGRAY);
         btnMusicAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((!RmsService.musicManager.IsRecording) && (spinnerRecords.getSelectedItemPosition() > 0)) {
-                    if (!RmsService.musicManager.IsPlaying) {
-                        MusicData music = Musics.get(spinnerRecords.getSelectedItemPosition() - 1); // Because add "Musics Recorded" in the first line
-                        RmsService.musicManager.PlayMusic(music);
-                        chronometer.start();
-                        btnMusicAction.setText("Stop");
+                if (!RmsService.musicManager.IsRecording) {
+                    if (spinnerRecords.getSelectedItemPosition() > 0) {
+                        if (!RmsService.musicManager.IsPlaying) {
+                            MusicData music = Musics.get(spinnerRecords.getSelectedItemPosition() - 1); // Because add "Musics Recorded" in the first line
+                            RmsService.musicManager.PlayMusic(music);
+                            chronometer.start();
+                            btnMusicAction.setText("Stop");
+                        } else {
+                            RmsService.musicManager.StopMusic();
+                            btnMusicAction.setText("Play");
+                            chronometer.reset();
+                        }
                     } else {
-                        RmsService.musicManager.StopMusic();
-                        btnMusicAction.setText("Play");
-                        chronometer.reset();
+                        showAlertDialog("Select a music to be played.");
                     }
                 } else {
                     showAlertDialog("Cannot play music while recording.");
@@ -108,31 +133,47 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         });
 
         btnRecord = (Button) findViewById(R.id.btnRecord);
-        btnRecord.setBackgroundColor(Color.LTGRAY);
+        ButtonSetColor(R.id.btnRecord, Color.LTGRAY);
         btnRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (!RmsService.musicManager.IsRecording) {
-                    RmsService.musicManager.StartRecording(spinnerSoundType.getSelectedItemPosition());
-                    btnRecord.setText("Recording");
-                    btnRecord.setBackgroundColor(0xFFDF3831);
-                    chronometer.start();
-                } else {
-                    try {
-                        RmsService.musicManager.StopRecording();
-                    } catch (Exception e) {
-                        FreeStyle.this.showAlertDialog(e.getMessage());
-                    }
-                    btnRecord.setText("Record");
-                    btnRecord.setBackgroundColor(Color.LTGRAY);
-                    chronometer.reset();
+                if (!RmsService.musicManager.IsPlaying) {
+                    if (!RmsService.musicManager.IsRecording) {
+                        RmsService.musicManager.StartRecording(spinnerSoundType.getSelectedItemPosition());
+                        btnRecord.setText("Recording");
+                        ButtonSetColor(R.id.btnRecord, 0xFFDF3831);
+                        chronometer.start();
+                    } else {
+                        try {
+                            RmsService.musicManager.StopRecording();
+                        } catch (Exception e) {
+                            FreeStyle.this.showAlertDialog(e.getMessage());
+                        }
+                        btnRecord.setText("Record");
+                        ButtonSetColor(R.id.btnRecord, Color.LTGRAY);
+                        chronometer.reset();
 
-                    UpdateSpinnerRecords();
+                        UpdateSpinnerRecords();
+                    }
+                } else {
+                    showAlertDialog("Cannot record music while playing.");
                 }
             }
         });
 
+    }
+
+    private void ResetAllFrets() {
+        for (int i = 0; i < 8; i++) {
+            SetFretImg(i, R.drawable.blankfret);
+        }
+    }
+
+    public void ButtonSetColor(int buttonName, int color) {
+        Drawable d = findViewById(buttonName).getBackground();
+        PorterDuffColorFilter filter = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        d.setColorFilter(filter);
     }
 
     private void UpdateSpinnerRecords() {
@@ -160,15 +201,6 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
 
             }
         });
-
-        spinnerRecords.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                MessageDialog messageDialog = new MessageDialog(FreeStyle.this.getBaseContext(), position);
-                messageDialog.show();
-                return false;
-            }
-        });
     }
 
     @Override
@@ -176,8 +208,11 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
 
         if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
             SetFretImg(noteData.Chord, R.drawable.redfret);
-        } else {
+        } else if (noteData.NoteDirection == NoteData.eNoteDirection.Output) {
             SetFretImg(noteData.Chord, R.drawable.blankfret);
+        } else {
+            ResetAllFrets();
+            chronometer.reset();
         }
 
     }
@@ -206,33 +241,87 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
                 imgFretSeven.setImageResource(color);
                 break;
             case 7:
-                imgFretOne.setImageResource(color);
+                imgFretEight.setImageResource(color);
                 break;
         }
     }
 
-    public class MessageDialog extends AlertDialog.Builder {
-        public String[] menuDialog = {"To Learn", "Delete", "Cancel"};
-        int cmdPosition;
+    private void showConfirmationDialog(final MusicData music) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Music")
+                .setMessage("Do you really want to delete the music " + music.Name + "?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        try {
+                            RmsService.musicManager.DeleteMusic(music);
+                            showAlertDialog("Music " + music.Name + " was deleted.");
+                            UpdateSpinnerRecords();
+                        } catch (Exception e) {
+                            showAlertDialog(e.getMessage());
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
+    }
 
-        protected MessageDialog(Context context, int commandPositionParam) {
+    private void showRenameMusicDialog(final MusicData musicParam) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Rename Music");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    musicParam.Name = input.getText().toString();
+                    RmsService.musicManager.RenameMusic(musicParam);
+                    UpdateSpinnerRecords();
+                } catch (Exception e) {
+                    showAlertDialog(e.getMessage());
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    public class MessageDialog extends AlertDialog.Builder {
+        public String[] menuDialog = {"To Learn", "Delete", "Rename", "Cancel"};
+        MusicData music;
+
+        protected MessageDialog(Context context, final MusicData musicParam) {
             super(context);
-            cmdPosition = commandPositionParam;
+            music = musicParam;
             this.setTitle("Data Format");
+
+            if (musicParam.ToLearn == 1) menuDialog[0] = "Not to Learn";
+
             this.setItems(menuDialog, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MusicData music = Musics.get(cmdPosition);
-
                     try {
                         switch (which) {
                             case 0:
-                                RmsService.musicManager.DeleteMusic(music);
+                                if (musicParam.ToLearn == 0) {
+                                    RmsService.musicManager.MusicToLearn(music);
+                                    showAlertDialog("Music set to learn.");
+                                } else {
+                                    RmsService.musicManager.MusicNotToLearn(music);
+                                    showAlertDialog("Music set not to learn.");
+                                }
                                 break;
                             case 1:
-                                RmsService.musicManager.MusicToLearn(music);
+                                showConfirmationDialog(music);
                                 break;
                             case 2:
+                                showRenameMusicDialog(music);
                                 break;
                             default:
                                 break;

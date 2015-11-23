@@ -35,7 +35,10 @@ public class BluetoothInterpreter {
             noteData.NoteDirection = (matcher.group(2).charAt(0) == 'i') ? NoteData.eNoteDirection.Input : NoteData.eNoteDirection.Output;
             noteData.Height = Integer.valueOf(matcher.group(3));
             rmsService.musicManager.onNoteReceived(noteData);
-            message = message.substring(matcher.group(0).length() + matcher.start(), message.length());
+            if (message.length() > (matcher.group(0).length() + matcher.start()))
+                message = message.substring(matcher.group(0).length() + matcher.start(), message.length()).trim();
+            else
+                message = "";
         }
     }
 

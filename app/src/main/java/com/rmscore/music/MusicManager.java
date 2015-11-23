@@ -26,6 +26,7 @@ public class MusicManager {
     public boolean IsRecording = false;
     public boolean IsPlaying = false;
     public Timer playNoteTimer;
+    public int InstrumentSelected = 0;
     private ArrayList<String> Instruments = new ArrayList<>();
     private RMSService rmsService;
     private MusicsDataTable musicsDataTable;
@@ -60,25 +61,26 @@ public class MusicManager {
     }
 
     public void onNoteReceived(NoteData noteData) {
+        if (noteData.NoteDirection == NoteData.eNoteDirection.Input)
+            playNote(noteData, InstrumentSelected);
 
-        if ((IsRecording) && (musicData != null)) {
+        if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
+            Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
+            msg.sendToTarget();
+        }
+
+        if ((musicData != null) && (IsRecording)) {
             if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
                 NoteTracking.get(noteData.Chord).Chord = noteData.Chord;
                 NoteTracking.get(noteData.Chord).Height = noteData.Height;
                 NoteTracking.get(noteData.Chord).StartTime = System.currentTimeMillis() - startMilliseconds;
-                playNote(noteData);
             } else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) &&
                     (NoteTracking.get(noteData.Chord).StartTime != -1)) {
                 NoteTracking.get(noteData.Chord).EndTime = System.currentTimeMillis() - startMilliseconds;
                 musicData.Notes.add(new NoteData(NoteTracking.get(noteData.Chord)));
                 NoteTracking.get(noteData.Chord).StartTime = -1;
             }
-            if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
-                Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
-                msg.sendToTarget();
-            }
         }
-
     }
 
     public void StartRecording(int instrumentChosenParam) {
@@ -116,7 +118,7 @@ public class MusicManager {
         if ((!IsPlaying) && (!IsRecording)) {
             IsPlaying = true;
             playNoteTimer = new Timer();
-            playNoteTimer.schedule(new PlayNoteTimeHandler(notesDataTable.GetNotes(musicDataParam)), 0, 1);
+            playNoteTimer.schedule(new PlayNoteTimeHandler(notesDataTable.GetNotes(musicDataParam), musicDataParam.Instrument), 0, 1);
         } else if (IsPlaying) {
             Utils.log("WTF for that");
         }
@@ -124,6 +126,12 @@ public class MusicManager {
 
     public void StopMusic() {
         if (IsPlaying) {
+            if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
+                NoteData noteData = new NoteData();
+                noteData.NoteDirection = NoteData.eNoteDirection.none; // to signal the UI that the music ended
+                Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
+                msg.sendToTarget();
+            }
             IsPlaying = false;
             playNoteTimer.cancel();
             playNoteTimer.purge();
@@ -157,32 +165,76 @@ public class MusicManager {
         musicsDataTable.UpdateMusic(musicDataParam);
     }
 
+    public void MusicNotToLearn(MusicData musicDataParam) throws Exception {
+        musicDataParam.ToLearn = 0;
+        musicsDataTable.UpdateMusic(musicDataParam);
+    }
+
+    public void RenameMusic(MusicData musicDataParam) throws Exception {
+        musicsDataTable.UpdateMusic(musicDataParam);
+    }
+
     public ArrayList<MusicData> GetMusicsToLearn() {
         return musicsDataTable.GetMusicsToLearn();
     }
 
     //TODO: Depending on the instrument chosen play different mid also depending on the height change the note played
-    private void playNote(NoteData noteData) {
+    private void playNote(NoteData noteData, int instrumentParam) {
+
         MediaPlayer mp = key[noteData.Chord];
         mp.seekTo(0);
         mp.start();
+
     }
 
     public class PlayNoteTimeHandler extends TimerTask {
         ArrayList<NoteData> notes;
         long timeCount = 0;
+        int instr;
 
-        public PlayNoteTimeHandler(ArrayList<NoteData> notesParam) {
+        public PlayNoteTimeHandler(ArrayList<NoteData> notesParam, int instrument) {
             notes = notesParam;
+            instr = instrument;
         }
 
         @Override
         public void run() {
             timeCount++;
-            for (int i = 0; i < notes.size(); i++) {
-                if (notes.get(i).StartTime == timeCount) {
-                    playNote(notes.get(i));
+            if (notes.size() > 0) {
+                for (int i = 0; i < notes.size(); i++) {
+                    if (notes.get(i).StartTime == timeCount) {
+                        NoteData noteData = notes.get(i);
+                        String noteSend;
+                        playNote(noteData, instr);
+                        noteSend = String.valueOf(noteData.Chord + ((int) 'A'));
+                        noteSend += noteData.Height;
+                        rmsService.SendToBluetooth(noteSend + "\r\n");
+
+                        if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
+                            noteData.NoteDirection = NoteData.eNoteDirection.Input;
+                            Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
+                            msg.sendToTarget();
+                        }
+                    }
+                    if (notes.get(i).EndTime == timeCount) {
+                        if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
+                            NoteData noteData = notes.get(i);
+                            noteData.NoteDirection = NoteData.eNoteDirection.Output;
+                            Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
+                            msg.sendToTarget();
+                        }
+                        notes.remove(i);
+                    }
                 }
+            } else {
+                if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
+                    NoteData noteData = new NoteData();
+                    noteData.NoteDirection = NoteData.eNoteDirection.none; // to signal the UI that the music ended
+                    Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
+                    msg.sendToTarget();
+                }
+                IsPlaying = false;
+                this.cancel();
             }
         }
     }

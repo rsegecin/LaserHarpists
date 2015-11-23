@@ -57,7 +57,7 @@ public class MusicsDataTable extends DBTable {
     public void UpdateMusic(MusicData musicDataParam) throws Exception {
         ContentValues cv;
 
-        if ((!musicDataParam.Name.isEmpty()) && (!musicDataParam.Author.isEmpty()) && (musicDataParam.Instrument != 0)) {
+        if (!musicDataParam.Name.isEmpty()) {
             cv = new ContentValues();
             cv.put("name", musicDataParam.Name);
             cv.put("author", musicDataParam.Author);
@@ -68,7 +68,7 @@ public class MusicsDataTable extends DBTable {
             db.update(Name, cv, "id_music=?",
                     new String[]{String.valueOf(musicDataParam.ID)});
         } else {
-            throw new Exception("Insert music name, who's the author to create music and the instrument played.");
+            throw new Exception("Music needs a name.");
         }
     }
 
