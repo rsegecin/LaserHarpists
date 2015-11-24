@@ -100,8 +100,9 @@ public class MusicManager {
     public void onNoteReceived(NoteData noteData) {
         if (noteData.NoteDirection == NoteData.eNoteDirection.Input)
             playNote(noteData);
-        else if (noteData.NoteDirection == NoteData.eNoteDirection.Output)
+        else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) && (NoteShouldLoop())) {
             stopNote(noteData);
+        }
 
         if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
             Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
@@ -236,18 +237,23 @@ public class MusicManager {
         musicsDataTable.UpdateMusic(musicDataParam);
     }
 
+    //return if the instrument hold the note
+    private boolean NoteShouldLoop() {
+        return (instrumentSelected == 2) || (instrumentSelected == 3) || (instrumentSelected == 4);
+    }
+
     private void playNote(NoteData noteData) {
         MediaPlayer mp = mediaPlayer[(noteData.Chord * 3) + noteData.GetDiscreteHeight()];
         mp.seekTo(0);
 
-//        if ((instrumentSelected == 2) || (instrumentSelected == 3) || (instrumentSelected == 4))
+//        if (NoteShouldLoop())
 //            mp.setLooping(true);
 
         mp.start();
     }
 
     private void stopNote(NoteData noteData) {
-        mediaPlayer[(noteData.Chord * 3) + noteData.GetDiscreteHeight()].stop();
+        mediaPlayer[(noteData.Chord * 3) + noteData.GetDiscreteHeight()].pause();
     }
 
     public void SendNoteToHarp(NoteData noteData) {
