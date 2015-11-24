@@ -25,14 +25,14 @@ public class MusicManager {
     public ArrayList<DBTable> DBTables = new ArrayList<>();
     public boolean IsRecording = false;
     public boolean IsPlaying = false;
-    public Timer playNoteTimer;
-    public int InstrumentSelected = 0;
-    private ArrayList<String> Instruments = new ArrayList<>();
+    private Timer playNoteTimer;
+    private int instrumentSelected = 0;
+    private ArrayList<String> instrumentsList = new ArrayList<>();
     private RMSService rmsService;
     private MusicsDataTable musicsDataTable;
     private NotesDataTable notesDataTable;
     private MusicData musicData;
-    private ArrayList<NoteData> NoteTracking = new ArrayList<>(); // to keep track of each note when it's interrupted and leave
+    private ArrayList<NoteData> noteTracking = new ArrayList<>(); // to keep track of each note when it's interrupted and leave
     private MediaPlayer[] key = new MediaPlayer[19];
     private long startMilliseconds;
 
@@ -45,24 +45,57 @@ public class MusicManager {
         DBTables.add(musicsDataTable);
         DBTables.add(notesDataTable);
 
-        Instruments.add("Piano");
+        instrumentsList.add("Acoustic Guitar");
+        instrumentsList.add("Electric Piano");
+        instrumentsList.add("Synth Plunk");
+        instrumentsList.add("Trombone");
+        instrumentsList.add("Violin");
 
-        TypedArray notes = rmsService.getResources().obtainTypedArray(R.array.notes);
-        for (int i = 0; i < notes.length(); i++) {
-            int k = notes.getResourceId(i, -1);
-            if (k != -1) {
-                this.key[i] = MediaPlayer.create(rmsService, k);
-            } else this.key[i] = null;
+        LoadInstrument(1);
+
+        for (int i = 0; i < 24; i++) {
+            noteTracking.add(new NoteData()); // Add 24 dummy notes
+        }
+    }
+
+    public void LoadInstrument(int instrumentParam) {
+        TypedArray notes;
+
+        instrumentSelected = instrumentParam;
+
+        switch (instrumentParam) {
+            case 0:
+                notes = rmsService.getResources().obtainTypedArray(R.array.acoustic_guitar_notes);
+                break;
+            case 1:
+                notes = rmsService.getResources().obtainTypedArray(R.array.electric_piano_notes);
+                break;
+            case 2:
+                notes = rmsService.getResources().obtainTypedArray(R.array.synth_pluck_notes);
+                break;
+            case 3:
+                notes = rmsService.getResources().obtainTypedArray(R.array.trombone_notes);
+                break;
+            case 4:
+                notes = rmsService.getResources().obtainTypedArray(R.array.violin_notes);
+                break;
+            default:
+                notes = rmsService.getResources().obtainTypedArray(R.array.electric_piano_notes);
+                break;
         }
 
-        for (int i = 0; i < 8; i++) {
-            NoteTracking.add(new NoteData()); // Add 8 dummy notes
+        for (int i = 0; i < notes.length(); i++) {
+            int k = notes.getResourceId(i, -1);
+            if (k != -1)
+                this.key[i] = MediaPlayer.create(rmsService, k);
+            else
+                this.key[i] = null;
         }
     }
 
     public void onNoteReceived(NoteData noteData) {
         if (noteData.NoteDirection == NoteData.eNoteDirection.Input)
-            playNote(noteData, InstrumentSelected);
+            playNote(noteData);
 
         if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
             Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
@@ -71,24 +104,24 @@ public class MusicManager {
 
         if ((musicData != null) && (IsRecording)) {
             if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
-                NoteTracking.get(noteData.Chord).Chord = noteData.Chord;
-                NoteTracking.get(noteData.Chord).Height = noteData.Height;
-                NoteTracking.get(noteData.Chord).StartTime = System.currentTimeMillis() - startMilliseconds;
+                noteTracking.get(noteData.Chord).Chord = noteData.Chord;
+                noteTracking.get(noteData.Chord).Height = noteData.Height;
+                noteTracking.get(noteData.Chord).StartTime = System.currentTimeMillis() - startMilliseconds;
             } else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) &&
-                    (NoteTracking.get(noteData.Chord).StartTime != -1)) {
-                NoteTracking.get(noteData.Chord).EndTime = System.currentTimeMillis() - startMilliseconds;
-                musicData.Notes.add(new NoteData(NoteTracking.get(noteData.Chord)));
-                NoteTracking.get(noteData.Chord).StartTime = -1;
+                    (noteTracking.get(noteData.Chord).StartTime != -1)) {
+                noteTracking.get(noteData.Chord).EndTime = System.currentTimeMillis() - startMilliseconds;
+                musicData.Notes.add(new NoteData(noteTracking.get(noteData.Chord)));
+                noteTracking.get(noteData.Chord).StartTime = -1;
             }
         }
     }
 
-    public void StartRecording(int instrumentChosenParam) {
+    public void StartRecording() {
         if ((!IsRecording) && (!IsPlaying)) {
             // Create new music
             musicData = new MusicData();
             musicData.Name = "New Music" + musicsDataTable.GetIDForNewMusic();
-            musicData.Instrument = instrumentChosenParam;
+            musicData.Instrument = instrumentSelected;
             musicData.Notes = new ArrayList<>();
 
             startMilliseconds = System.currentTimeMillis();
@@ -118,7 +151,10 @@ public class MusicManager {
         if ((!IsPlaying) && (!IsRecording)) {
             IsPlaying = true;
             playNoteTimer = new Timer();
-            playNoteTimer.schedule(new PlayNoteTimeHandler(notesDataTable.GetNotes(musicDataParam), musicDataParam.Instrument), 0, 1);
+
+            LoadInstrument(musicDataParam.Instrument);
+
+            playNoteTimer.schedule(new PlayNoteTimeHandler(notesDataTable.GetNotes(musicDataParam)), 0, 1);
         } else if (IsPlaying) {
             Utils.log("WTF for that");
         }
@@ -153,7 +189,7 @@ public class MusicManager {
     }
 
     public ArrayList<String> GetInstruments() {
-        return Instruments;
+        return instrumentsList;
     }
 
     public void DeleteMusic(MusicData musicDataParam) throws Exception {
@@ -178,23 +214,28 @@ public class MusicManager {
         return musicsDataTable.GetMusicsToLearn();
     }
 
-    //TODO: Depending on the instrument chosen play different mid also depending on the height change the note played
-    private void playNote(NoteData noteData, int instrumentParam) {
+    private void playNote(NoteData noteData) {
+        int height;
 
-        MediaPlayer mp = key[noteData.Chord];
+        if (noteData.Height >= 0 && noteData.Height < 22) {
+            height = 0;
+        } else if (noteData.Height >= 22 && noteData.Height < 44) {
+            height = 1;
+        } else {
+            height = 2;
+        }
+
+        MediaPlayer mp = key[(noteData.Chord * 3) + height];
         mp.seekTo(0);
         mp.start();
-
     }
 
     public class PlayNoteTimeHandler extends TimerTask {
         ArrayList<NoteData> notes;
         long timeCount = 0;
-        int instr;
 
-        public PlayNoteTimeHandler(ArrayList<NoteData> notesParam, int instrument) {
+        public PlayNoteTimeHandler(ArrayList<NoteData> notesParam) {
             notes = notesParam;
-            instr = instrument;
         }
 
         @Override
@@ -205,7 +246,7 @@ public class MusicManager {
                     if (notes.get(i).StartTime == timeCount) {
                         NoteData noteData = notes.get(i);
                         String noteSend;
-                        playNote(noteData, instr);
+                        playNote(noteData);
                         noteSend = String.valueOf(noteData.Chord + ((int) 'A'));
                         noteSend += noteData.Height;
                         rmsService.SendToBluetooth(noteSend + "\r\n");

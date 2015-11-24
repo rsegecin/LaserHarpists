@@ -69,7 +69,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         spinnerSoundType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                FreeStyle.this.RmsService.musicManager.InstrumentSelected = position;
+                FreeStyle.this.RmsService.musicManager.LoadInstrument(position);
             }
 
             @Override
@@ -140,7 +140,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
 
                 if (!RmsService.musicManager.IsPlaying) {
                     if (!RmsService.musicManager.IsRecording) {
-                        RmsService.musicManager.StartRecording(spinnerSoundType.getSelectedItemPosition());
+                        RmsService.musicManager.StartRecording();
                         btnRecord.setText("Recording");
                         ButtonSetColor(R.id.btnRecord, 0xFFDF3831);
                         chronometer.start();
