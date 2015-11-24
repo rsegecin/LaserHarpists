@@ -34,7 +34,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     // Intent request codes
     public boolean PendingRequestBluetoothPermission = true;
     public UIHandler uiHandler;
-    public RMSService RmsService;
+    protected RMSService rmsService;
     protected boolean ServiceConnected = false;
 
     /**
@@ -45,7 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to RMSService, cast the IBinder and get RMSService instance
             LocalBinder binder = (LocalBinder) service;
-            RmsService = binder.getService();
+            rmsService = binder.getService();
             ServiceConnected = true;
 
             ServiceStarted();
@@ -104,12 +104,12 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         super.onStart();
         Utils.log("Life cycle onStart at " + getClass().getName());
 
-        if ((!(this instanceof Welcome)) && (RmsService != null) && (!RmsService.IsBluetoothConnected())) {
+        if ((!(this instanceof Welcome)) && (rmsService != null) && (!rmsService.IsBluetoothConnected())) {
             finish();
         }
 
-        if (RmsService != null)
-            RmsService.CurrentActivity = this;
+        if (rmsService != null)
+            rmsService.CurrentActivity = this;
     }
 
     @Override
@@ -117,8 +117,8 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         super.onResume();
         Utils.log("Life cycle onResume at " + getClass().getName());
 
-        if (RmsService != null)
-            RmsService.CurrentActivity = this;
+        if (rmsService != null)
+            rmsService.CurrentActivity = this;
     }
 
     @Override
@@ -126,8 +126,8 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         super.onPause();
         Utils.log("Life cycle onPause at " + getClass().getName());
 
-        if (RmsService != null)
-            RmsService.CurrentActivity = null;
+        if (rmsService != null)
+            rmsService.CurrentActivity = null;
     }
 
     @Override
@@ -135,15 +135,15 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
         Utils.log("Life cycle onDestroy at " + getClass().getName());
         super.onDestroy();
 
-        if (RmsService != null)
-            RmsService.CurrentActivity = null;
+        if (rmsService != null)
+            rmsService.CurrentActivity = null;
     }
 
     @Override
     public void ServiceStarted() {
         Utils.log("Life cycle Service started at " + BaseActivity.this.getClass().getName());
 
-        RmsService.CurrentActivity = this;
+        rmsService.CurrentActivity = this;
     }
 
     @Override
@@ -155,7 +155,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
                 if (resultCode == Activity.RESULT_OK) {
                     String address = data.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     try {
-                        RmsService.ConnectWithBluetooth(address);
+                        rmsService.ConnectWithBluetooth(address);
                     } catch (Exception e) {
                         showAlertDialog(e.getMessage());
                     }
@@ -175,7 +175,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
     }
 
     private void startBluetoothDeviceListActivity() {
-        RmsService.DisconnectBluetooth();
+        rmsService.DisconnectBluetooth();
         Intent serverIntent = new Intent(this, DeviceListActivity.class);
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
@@ -184,10 +184,10 @@ public abstract class BaseActivity extends AppCompatActivity implements iBaseAct
      * Connects, disconnects with bluetooth and asks permission if necessary
      */
     protected void MakeBluetoothHappen() {
-        if (RmsService.HasBluetooth()) {
-            if (RmsService.IsBluetoothReady()) {
-                if (RmsService.IsBluetoothConnected()) {
-                    RmsService.DisconnectBluetooth();
+        if (rmsService.HasBluetooth()) {
+            if (rmsService.IsBluetoothReady()) {
+                if (rmsService.IsBluetoothConnected()) {
+                    rmsService.DisconnectBluetooth();
                     Toast.makeText(this, getString(R.string.bt_device_lost), Toast.LENGTH_SHORT).show();
                 } else
                     startBluetoothDeviceListActivity();

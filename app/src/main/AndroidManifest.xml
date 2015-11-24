@@ -11,6 +11,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name=".Welcome"
             android:label="@string/title_activity_wellcome"
@@ -22,28 +23,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LearnToPlayList"
-            android:label="@string/title_activity_learn_to_play_list"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
+
         <activity
             android:name=".FreeStyle"
             android:label="@string/title_activity_free_style"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+
+        <activity
+            android:name=".ScoreGame"
+            android:label="@string/title_activity_score_game"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+
         <activity
             android:name=".SettingsActivity"
             android:label="@string/app_name" >
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- </intent-filter> -->
         </activity>
-        <activity
-            android:name="com.rmscore.bluetooth.DeviceListActivity"
-            android:label="@string/select_device"
-            android:theme="@android:style/Theme.Holo.Dialog" />
 
         <service
             android:name="com.rmscore.RMSService"
@@ -51,9 +46,10 @@
         </service>
 
         <activity
-            android:name=".ScoreGame"
-            android:label="@string/title_activity_score_game"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:name="com.rmscore.bluetooth.DeviceListActivity"
+            android:label="@string/select_device"
+            android:theme="@android:style/Theme.Holo.Dialog"></activity>
+
     </application>
 
 </manifest>

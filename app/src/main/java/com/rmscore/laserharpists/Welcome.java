@@ -31,8 +31,8 @@ public class Welcome extends BaseActivity {
         btnLearnToPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (RmsService.IsBluetoothConnected()) {
-                    Intent intent = new Intent(Welcome.this, LearnToPlayList.class);
+                if (rmsService.IsBluetoothConnected()) {
+                    Intent intent = new Intent(Welcome.this, ScoreGame.class);
                     startActivity(intent);
                 }
                 else {
@@ -45,7 +45,7 @@ public class Welcome extends BaseActivity {
         btnFreeStyle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (RmsService.IsBluetoothConnected()) {
+                if (rmsService.IsBluetoothConnected()) {
                     Intent intent = new Intent(Welcome.this, FreeStyle.class);
                     startActivity(intent);
                 }

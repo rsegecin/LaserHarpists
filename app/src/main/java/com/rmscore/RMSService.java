@@ -118,8 +118,6 @@ public class RMSService extends IntentService implements iBluetoothHandler {
         if (message.isEmpty())
             return;
 
-        message += "\r\n";
-
         byte[] command = message.getBytes();
 
         if (IsBluetoothConnected()) {

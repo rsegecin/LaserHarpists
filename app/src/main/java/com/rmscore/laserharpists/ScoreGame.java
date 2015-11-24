@@ -1,12 +1,44 @@
 package com.rmscore.laserharpists;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.rmscore.bases.BaseActivity;
+import com.rmscore.datamodels.MusicData;
+import com.rmscore.datamodels.NoteData;
+import com.rmscore.music.INoteReceiver;
+import com.rmscore.utils.SimpleArrayAdapter;
 
-public class ScoreGame extends BaseActivity {
+import java.util.ArrayList;
+
+public class ScoreGame extends BaseActivity implements INoteReceiver {
+
+    private ArrayList<MusicData> musics = new ArrayList<>();
+    private ArrayList<String> strMusics = new ArrayList<>();
+
+    private MusicData musicSelected;
+
+    private Spinner spinnerMusics;
+    private TextView txtNotesToGo;
+    private TextView txtErros;
+
+    private ImageView imgFretOne;
+    private ImageView imgFretTwo;
+    private ImageView imgFretThree;
+    private ImageView imgFretFour;
+    private ImageView imgFretFive;
+    private ImageView imgFretSix;
+    private ImageView imgFretSeven;
+    private ImageView imgFretEight;
+
+    private int noteIndex = 0;
+    private int notesToGo = 0;
+    private int noteErrors = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,11 +46,133 @@ public class ScoreGame extends BaseActivity {
         setContentView(R.layout.activity_score_game);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+    }
 
-        Intent myIntent = getIntent();
-        int music_chosen = myIntent.getIntExtra(LearnToPlayList.MUSIC_CHOSEN, 0);
+    @Override
+    public void ServiceStarted() {
+        super.ServiceStarted();
 
-        toast("You've chosen " + music_chosen);
+        musics = rmsService.musicManager.GetMusicsToLearn();
+        strMusics = rmsService.musicManager.GetStrMusicsToLearn(musics);
+
+        InitLayout();
+    }
+
+    private void InitLayout() {
+        SimpleArrayAdapter adapterMusics =
+                new SimpleArrayAdapter(this, R.layout.listview_item,
+                        strMusics, SimpleArrayAdapter.eTextAlign.left);
+
+        spinnerMusics = (Spinner) findViewById(R.id.spinnerMusics);
+        spinnerMusics.setAdapter(adapterMusics);
+        spinnerMusics.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (musics.size() > 0) {
+                    musicSelected = rmsService.musicManager.GetMusic(musics.get(position).ID); // Gotten from service to load the notes as well
+                    StartLearn();
+                } else {
+                    showAlertDialog("Please record a music on free style and edit it's properties 'To Learn'");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        txtNotesToGo = (TextView) findViewById(R.id.txtNotesToGo);
+        txtErros = (TextView) findViewById(R.id.txtErros);
+
+        imgFretOne = (ImageView) findViewById(R.id.imgFretOne);
+        imgFretTwo = (ImageView) findViewById(R.id.imgFretTwo);
+        imgFretThree = (ImageView) findViewById(R.id.imgFretThree);
+        imgFretFour = (ImageView) findViewById(R.id.imgFretFour);
+        imgFretFive = (ImageView) findViewById(R.id.imgFretFive);
+        imgFretSix = (ImageView) findViewById(R.id.imgFretSix);
+        imgFretSeven = (ImageView) findViewById(R.id.imgFretSeven);
+        imgFretEight = (ImageView) findViewById(R.id.imgFretEight);
+
+        if (strMusics.size() == 0) {
+            strMusics.add("[No music to learn]");
+        }
+//        else {
+//            musicSelected = rmsService.musicManager.GetMusic(musics.get(0).ID); // Gotten from service to load the notes as well
+//            StartLearn();
+//        }
+    }
+
+    private void StartLearn() {
+        notesToGo = musicSelected.Notes.size();
+        txtNotesToGo.setText(String.valueOf(notesToGo));
+        txtErros.setText("0");
+
+        SendNoteToHarp();
+    }
+
+    private void SendNoteToHarp() {
+        rmsService.musicManager.SendNoteToHarp(musicSelected.Notes.get(noteIndex));
+        noteIndex++;
+    }
+
+    @Override
+    public void onNoteReceived(NoteData noteData) {
+
+        notesToGo--;
+        txtNotesToGo.setText(String.valueOf(notesToGo));
+
+        if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
+            SetFretImg(noteData.Chord, R.drawable.redfret);
+        } else if (noteData.NoteDirection == NoteData.eNoteDirection.Output) {
+            SetFretImg(noteData.Chord, R.drawable.blankfret);
+        } else {
+            ResetAllFrets();
+        }
+
+        if ((noteData.Chord != musicSelected.Notes.get(noteIndex).Chord) &&
+                (noteData.GetDiscreteHeight() != musicSelected.Notes.get(noteIndex).GetDiscreteHeight())) {
+            noteErrors++;
+            txtErros.setText(String.valueOf(noteErrors));
+        }
+
+        SendNoteToHarp();
+
+    }
+
+    private void ResetAllFrets() {
+        for (int i = 0; i < 8; i++) {
+            SetFretImg(i, R.drawable.blankfret);
+        }
+    }
+
+    private void SetFretImg(int chord, int color) {
+        switch (chord) {
+            case 0:
+                imgFretOne.setImageResource(color);
+                break;
+            case 1:
+                imgFretTwo.setImageResource(color);
+                break;
+            case 2:
+                imgFretThree.setImageResource(color);
+                break;
+            case 3:
+                imgFretFour.setImageResource(color);
+                break;
+            case 4:
+                imgFretFive.setImageResource(color);
+                break;
+            case 5:
+                imgFretSix.setImageResource(color);
+                break;
+            case 6:
+                imgFretSeven.setImageResource(color);
+                break;
+            case 7:
+                imgFretEight.setImageResource(color);
+                break;
+        }
     }
 
 }

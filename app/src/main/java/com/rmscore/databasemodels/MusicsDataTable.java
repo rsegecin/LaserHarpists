@@ -72,6 +72,24 @@ public class MusicsDataTable extends DBTable {
         }
     }
 
+    public MusicData GetMusic(long idParam) {
+        MusicData music = new MusicData();
+        Cursor cursor = db.rawQuery("Select * From " + Name + " Where id_music = " + String.valueOf(idParam), null);
+
+        if ((cursor != null) && (cursor.moveToFirst())) {
+            music.ID = Integer.valueOf(cursor.getString(0));
+            music.Name = cursor.getString(1);
+            music.Author = cursor.getString(2);
+            music.Instrument = Integer.valueOf(cursor.getString(3));
+            music.ToLearn = Integer.valueOf(cursor.getString(4));
+            music.AuthorsBestScore = cursor.getString(5);
+            if ((cursor.getString(6) != null) && (!cursor.getString(6).isEmpty()))
+                music.BestScore = Double.valueOf(cursor.getString(6));
+        }
+
+        return music;
+    }
+
     public ArrayList<MusicData> GetMusics() {
         ArrayList<MusicData> musics = new ArrayList<>();
         Cursor cursor = db.rawQuery(rmsService.DBManager.GetTableByName(Name).GetSelectQuery(), null);
@@ -113,17 +131,6 @@ public class MusicsDataTable extends DBTable {
         }
 
         return musics;
-    }
-
-    public ArrayList<String> GetMusicList() {
-        ArrayList<MusicData> musics = this.GetMusics();
-        ArrayList<String> strMusics = new ArrayList<>();
-
-        for (MusicData music : musics) {
-            strMusics.add(music.Name);
-        }
-
-        return strMusics;
     }
 
     public int GetIDForNewMusic() {

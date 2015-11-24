@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/textView2"
+        android:layout_below="@+id/txtNotesToGo"
         android:layout_marginTop="38dp"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
@@ -127,25 +127,15 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/txtNotesToGo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="19dp"
-        android:text="135"
+        android:text="0"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="40dp" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="19dp"
-        android:text="Brilha Brilha Estrelinha"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
         android:id="@+id/textView5"
@@ -158,13 +148,21 @@
         android:text="Erros:" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/txtErros"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView5"
-        android:layout_alignLeft="@+id/textView3"
-        android:layout_alignStart="@+id/textView3"
+        android:layout_centerHorizontal="true"
         android:text="0"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Spinner
+        android:id="@+id/spinnerMusics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:spinnerMode="dialog" />
 
 </RelativeLayout>

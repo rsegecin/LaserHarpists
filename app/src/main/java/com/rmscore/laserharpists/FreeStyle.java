@@ -31,6 +31,11 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
     private ArrayList<MusicData> Musics = new ArrayList<>();
     private Spinner spinnerSoundType;
     private Spinner spinnerRecords;
+    private Button btnEdit;
+    private Button btnMusicAction;
+    private Button btnRecord;
+    private Chronometer chronometer;
+
     private ImageView imgFretOne;
     private ImageView imgFretTwo;
     private ImageView imgFretThree;
@@ -39,10 +44,6 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
     private ImageView imgFretSix;
     private ImageView imgFretSeven;
     private ImageView imgFretEight;
-    private Button btnEdit;
-    private Button btnMusicAction;
-    private Button btnRecord;
-    private Chronometer chronometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +63,14 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
     private void InitLayout() {
         SimpleArrayAdapter adapterInstruments =
                 new SimpleArrayAdapter(this, R.layout.listview_item,
-                        RmsService.musicManager.GetInstruments(), SimpleArrayAdapter.eTextAlign.left);
+                        rmsService.musicManager.GetInstruments(), SimpleArrayAdapter.eTextAlign.left);
 
         spinnerSoundType = (Spinner) findViewById(R.id.spinnerSoundType);
         spinnerSoundType.setAdapter(adapterInstruments);
         spinnerSoundType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                FreeStyle.this.RmsService.musicManager.LoadInstrument(position);
+                FreeStyle.this.rmsService.musicManager.LoadInstrument(position);
             }
 
             @Override
@@ -111,15 +112,15 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
         btnMusicAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!RmsService.musicManager.IsRecording) {
+                if (!rmsService.musicManager.IsRecording) {
                     if (spinnerRecords.getSelectedItemPosition() > 0) {
-                        if (!RmsService.musicManager.IsPlaying) {
+                        if (!rmsService.musicManager.IsPlaying) {
                             MusicData music = Musics.get(spinnerRecords.getSelectedItemPosition() - 1); // Because add "Musics Recorded" in the first line
-                            RmsService.musicManager.PlayMusic(music);
+                            rmsService.musicManager.PlayMusic(music);
                             chronometer.start();
                             btnMusicAction.setText("Stop");
                         } else {
-                            RmsService.musicManager.StopMusic();
+                            rmsService.musicManager.StopMusic();
                             btnMusicAction.setText("Play");
                             chronometer.reset();
                         }
@@ -138,15 +139,15 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
             @Override
             public void onClick(View v) {
 
-                if (!RmsService.musicManager.IsPlaying) {
-                    if (!RmsService.musicManager.IsRecording) {
-                        RmsService.musicManager.StartRecording();
+                if (!rmsService.musicManager.IsPlaying) {
+                    if (!rmsService.musicManager.IsRecording) {
+                        rmsService.musicManager.StartRecording();
                         btnRecord.setText("Recording");
                         ButtonSetColor(R.id.btnRecord, 0xFFDF3831);
                         chronometer.start();
                     } else {
                         try {
-                            RmsService.musicManager.StopRecording();
+                            rmsService.musicManager.StopRecording();
                         } catch (Exception e) {
                             FreeStyle.this.showAlertDialog(e.getMessage());
                         }
@@ -164,12 +165,6 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
 
     }
 
-    private void ResetAllFrets() {
-        for (int i = 0; i < 8; i++) {
-            SetFretImg(i, R.drawable.blankfret);
-        }
-    }
-
     public void ButtonSetColor(int buttonName, int color) {
         Drawable d = findViewById(buttonName).getBackground();
         PorterDuffColorFilter filter = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP);
@@ -179,8 +174,8 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
     private void UpdateSpinnerRecords() {
         ArrayList<String> strMusics;
 
-        Musics = RmsService.musicManager.GetMusics();
-        strMusics = RmsService.musicManager.GetStrMusics(Musics);
+        Musics = rmsService.musicManager.GetMusics();
+        strMusics = rmsService.musicManager.GetStrMusics(Musics);
 
         strMusics.add(0, "Musics Recorded");
 
@@ -215,6 +210,12 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
             chronometer.reset();
         }
 
+    }
+
+    private void ResetAllFrets() {
+        for (int i = 0; i < 8; i++) {
+            SetFretImg(i, R.drawable.blankfret);
+        }
     }
 
     private void SetFretImg(int chord, int color) {
@@ -254,7 +255,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         try {
-                            RmsService.musicManager.DeleteMusic(music);
+                            rmsService.musicManager.DeleteMusic(music);
                             showAlertDialog("Music " + music.Name + " was deleted.");
                             UpdateSpinnerRecords();
                         } catch (Exception e) {
@@ -276,7 +277,7 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
             public void onClick(DialogInterface dialog, int which) {
                 try {
                     musicParam.Name = input.getText().toString();
-                    RmsService.musicManager.RenameMusic(musicParam);
+                    rmsService.musicManager.RenameMusic(musicParam);
                     UpdateSpinnerRecords();
                 } catch (Exception e) {
                     showAlertDialog(e.getMessage());
@@ -310,10 +311,10 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
                         switch (which) {
                             case 0:
                                 if (musicParam.ToLearn == 0) {
-                                    RmsService.musicManager.MusicToLearn(music);
+                                    rmsService.musicManager.MusicToLearn(music);
                                     showAlertDialog("Music set to learn.");
                                 } else {
-                                    RmsService.musicManager.MusicNotToLearn(music);
+                                    rmsService.musicManager.MusicNotToLearn(music);
                                     showAlertDialog("Music set not to learn.");
                                 }
                                 break;

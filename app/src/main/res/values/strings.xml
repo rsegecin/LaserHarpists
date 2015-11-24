@@ -62,8 +62,7 @@
 
     <!--Activities-->
     <string name="title_activity_wellcome">Laser Harpists</string>
-    <string name="title_activity_learn_to_play_list">Learn To Play</string>
-    <string name="title_activity_score_game">Score Game</string>
+    <string name="title_activity_score_game">Learn To Play</string>
     <string name="title_activity_free_style">Free Style</string>
     <!--/Activities-->
 

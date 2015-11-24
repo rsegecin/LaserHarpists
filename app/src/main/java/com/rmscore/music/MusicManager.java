@@ -25,16 +25,18 @@ public class MusicManager {
     public ArrayList<DBTable> DBTables = new ArrayList<>();
     public boolean IsRecording = false;
     public boolean IsPlaying = false;
-    private Timer playNoteTimer;
-    private int instrumentSelected = 0;
-    private ArrayList<String> instrumentsList = new ArrayList<>();
+
     private RMSService rmsService;
     private MusicsDataTable musicsDataTable;
     private NotesDataTable notesDataTable;
     private MusicData musicData;
-    private ArrayList<NoteData> noteTracking = new ArrayList<>(); // to keep track of each note when it's interrupted and leave
-    private MediaPlayer[] key = new MediaPlayer[19];
+
+    private int instrumentSelected = 0;
     private long startMilliseconds;
+    private ArrayList<String> instrumentsList = new ArrayList<>();
+    private Timer playNoteTimer;
+    private MediaPlayer[] mediaPlayer;
+    private ArrayList<NoteData> noteTracking = new ArrayList<>(); // to keep track of each note when it's interrupted and leave
 
     public MusicManager(RMSService rmsServiceParam) {
         rmsService = rmsServiceParam;
@@ -84,18 +86,22 @@ public class MusicManager {
                 break;
         }
 
+        mediaPlayer = new MediaPlayer[notes.length()];
+
         for (int i = 0; i < notes.length(); i++) {
             int k = notes.getResourceId(i, -1);
             if (k != -1)
-                this.key[i] = MediaPlayer.create(rmsService, k);
+                this.mediaPlayer[i] = MediaPlayer.create(rmsService, k);
             else
-                this.key[i] = null;
+                this.mediaPlayer[i] = null;
         }
     }
 
     public void onNoteReceived(NoteData noteData) {
         if (noteData.NoteDirection == NoteData.eNoteDirection.Input)
             playNote(noteData);
+        else if (noteData.NoteDirection == NoteData.eNoteDirection.Output)
+            stopNote(noteData);
 
         if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
             Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
@@ -188,8 +194,28 @@ public class MusicManager {
         return m;
     }
 
+    public ArrayList<MusicData> GetMusicsToLearn() {
+        return musicsDataTable.GetMusicsToLearn();
+    }
+
+    public ArrayList<String> GetStrMusicsToLearn(ArrayList<MusicData> musicsParam) {
+        ArrayList<String> m = new ArrayList<>();
+
+        for (int i = 0; i < musicsParam.size(); i++) {
+            m.add(musicsParam.get(i).Name);
+        }
+
+        return m;
+    }
+
     public ArrayList<String> GetInstruments() {
         return instrumentsList;
+    }
+
+    public MusicData GetMusic(long idParam) {
+        MusicData musicData = musicsDataTable.GetMusic(idParam);
+        musicData.Notes = notesDataTable.GetNotes(musicData);
+        return musicData;
     }
 
     public void DeleteMusic(MusicData musicDataParam) throws Exception {
@@ -210,24 +236,32 @@ public class MusicManager {
         musicsDataTable.UpdateMusic(musicDataParam);
     }
 
-    public ArrayList<MusicData> GetMusicsToLearn() {
-        return musicsDataTable.GetMusicsToLearn();
+    private void playNote(NoteData noteData) {
+        MediaPlayer mp = mediaPlayer[(noteData.Chord * 3) + noteData.GetDiscreteHeight()];
+        mp.seekTo(0);
+
+//        if ((instrumentSelected == 2) || (instrumentSelected == 3) || (instrumentSelected == 4))
+//            mp.setLooping(true);
+
+        mp.start();
     }
 
-    private void playNote(NoteData noteData) {
-        int height;
+    private void stopNote(NoteData noteData) {
+        mediaPlayer[(noteData.Chord * 3) + noteData.GetDiscreteHeight()].stop();
+    }
 
-        if (noteData.Height >= 0 && noteData.Height < 22) {
-            height = 0;
-        } else if (noteData.Height >= 22 && noteData.Height < 44) {
-            height = 1;
+    public void SendNoteToHarp(NoteData noteData) {
+        String strNote = String.valueOf(((char) (noteData.Chord + 'A')));
+        if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
+            strNote += "i";
+        } else if (noteData.NoteDirection == NoteData.eNoteDirection.Output) {
+            strNote += "o";
         } else {
-            height = 2;
+            strNote += "n";
         }
+        strNote += String.valueOf(noteData.Height);
 
-        MediaPlayer mp = key[(noteData.Chord * 3) + height];
-        mp.seekTo(0);
-        mp.start();
+        rmsService.SendToBluetooth(strNote + "\r\n");
     }
 
     public class PlayNoteTimeHandler extends TimerTask {
@@ -279,4 +313,5 @@ public class MusicManager {
             }
         }
     }
+
 }
