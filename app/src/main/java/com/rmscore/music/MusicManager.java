@@ -36,7 +36,6 @@ public class MusicManager {
     private ArrayList<String> instrumentsList = new ArrayList<>();
     private Timer playNoteTimer;
     private MediaPlayer[] mediaPlayer;
-    private ArrayList<NoteData> noteTracking = new ArrayList<>(); // to keep track of each note when it's interrupted and leave
 
     public MusicManager(RMSService rmsServiceParam) {
         rmsService = rmsServiceParam;
@@ -54,10 +53,6 @@ public class MusicManager {
         instrumentsList.add("Violin");
 
         LoadInstrument(1);
-
-        for (int i = 0; i < 24; i++) {
-            noteTracking.add(new NoteData()); // Add 24 dummy notes
-        }
     }
 
     public void LoadInstrument(int instrumentParam) {
@@ -98,9 +93,9 @@ public class MusicManager {
     }
 
     public void onNoteReceived(NoteData noteData) {
-        if (noteData.NoteDirection == NoteData.eNoteDirection.Input)
+        if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
             playNote(noteData);
-        else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) && (NoteShouldLoop())) {
+        } else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) && (noteShouldLoop())) {
             stopNote(noteData);
         }
 
@@ -110,16 +105,8 @@ public class MusicManager {
         }
 
         if ((musicData != null) && (IsRecording)) {
-            if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
-                noteTracking.get(noteData.Chord).Chord = noteData.Chord;
-                noteTracking.get(noteData.Chord).Height = noteData.Height;
-                noteTracking.get(noteData.Chord).StartTime = System.currentTimeMillis() - startMilliseconds;
-            } else if ((noteData.NoteDirection == NoteData.eNoteDirection.Output) &&
-                    (noteTracking.get(noteData.Chord).StartTime != -1)) {
-                noteTracking.get(noteData.Chord).EndTime = System.currentTimeMillis() - startMilliseconds;
-                musicData.Notes.add(new NoteData(noteTracking.get(noteData.Chord)));
-                noteTracking.get(noteData.Chord).StartTime = -1;
-            }
+            noteData.Time = System.currentTimeMillis() - startMilliseconds;
+            musicData.Notes.add(noteData);
         }
     }
 
@@ -238,7 +225,7 @@ public class MusicManager {
     }
 
     //return if the instrument hold the note
-    private boolean NoteShouldLoop() {
+    private boolean noteShouldLoop() {
         return (instrumentSelected == 2) || (instrumentSelected == 3) || (instrumentSelected == 4);
     }
 
@@ -246,7 +233,7 @@ public class MusicManager {
         MediaPlayer mp = mediaPlayer[(noteData.Chord * 3) + noteData.GetDiscreteHeight()];
         mp.seekTo(0);
 
-//        if (NoteShouldLoop())
+//        if (noteShouldLoop())
 //            mp.setLooping(true);
 
         mp.start();
@@ -283,28 +270,23 @@ public class MusicManager {
             timeCount++;
             if (notes.size() > 0) {
                 for (int i = 0; i < notes.size(); i++) {
-                    if (notes.get(i).StartTime == timeCount) {
+                    if (notes.get(i).Time == timeCount) {
                         NoteData noteData = notes.get(i);
                         String noteSend;
-                        playNote(noteData);
                         noteSend = String.valueOf(noteData.Chord + ((int) 'A'));
                         noteSend += noteData.Height;
                         rmsService.SendToBluetooth(noteSend + "\r\n");
 
+                        if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
+                            playNote(noteData);
+                        } else if (noteData.NoteDirection == NoteData.eNoteDirection.Output) {
+                            stopNote(noteData);
+                        }
+
                         if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
-                            noteData.NoteDirection = NoteData.eNoteDirection.Input;
                             Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
                             msg.sendToTarget();
                         }
-                    }
-                    if (notes.get(i).EndTime == timeCount) {
-                        if ((rmsService.CurrentActivity != null) && ((rmsService.CurrentActivity instanceof INoteReceiver))) {
-                            NoteData noteData = notes.get(i);
-                            noteData.NoteDirection = NoteData.eNoteDirection.Output;
-                            Message msg = rmsService.CurrentActivity.uiHandler.obtainMessage(1, noteData);
-                            msg.sendToTarget();
-                        }
-                        notes.remove(i);
                     }
                 }
             } else {

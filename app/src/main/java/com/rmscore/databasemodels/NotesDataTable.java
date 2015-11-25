@@ -24,8 +24,8 @@ public class NotesDataTable extends DBTable {
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "id_music"));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "chord"));
         AddRegister(new DBRegister(DBRegister.eRegisterTypes.REAL, "height"));
-        AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "start_time"));
-        AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "end_time"));
+        AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "time"));
+        AddRegister(new DBRegister(DBRegister.eRegisterTypes.INTEGER, "direction"));
     }
 
     public void AddNote(NoteData noteDataParam) throws Exception {
@@ -36,8 +36,8 @@ public class NotesDataTable extends DBTable {
             cv.put("id_music", noteDataParam.MusicID);
             cv.put("chord", noteDataParam.Chord);
             cv.put("height", noteDataParam.Height);
-            cv.put("start_time", noteDataParam.StartTime);
-            cv.put("end_time", noteDataParam.EndTime);
+            cv.put("time", noteDataParam.Time);
+            cv.put("direction", noteDataParam.NoteDirection.ordinal());
             db.insert(Name, null, cv);
         } else {
             throw new Exception("The Note must belong to some music.");
@@ -59,8 +59,8 @@ public class NotesDataTable extends DBTable {
                 note.MusicID = Integer.valueOf(cursor.getString(1));
                 note.Chord = Integer.valueOf(cursor.getString(2));
                 note.Height = Double.valueOf(cursor.getString(3));
-                note.StartTime = Integer.valueOf(cursor.getString(4));
-                note.EndTime = Integer.valueOf(cursor.getString(5));
+                note.Time = Integer.valueOf(cursor.getString(4));
+                note.NoteDirection = NoteData.eNoteDirection.values()[Integer.valueOf(cursor.getString(5))];
                 notes.add(note);
             } while (cursor.moveToNext());
         }

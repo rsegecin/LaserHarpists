@@ -165,4 +165,13 @@
         android:layout_alignParentTop="true"
         android:spinnerMode="dialog" />
 
+    <Button
+        android:id="@+id/btnStartAgain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/spinnerMusics"
+        android:text="Start To Learn" />
+
 </RelativeLayout>

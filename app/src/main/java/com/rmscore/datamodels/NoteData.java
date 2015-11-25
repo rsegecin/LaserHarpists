@@ -9,20 +9,17 @@ public class NoteData {
     public long MusicID;
     public int Chord;
     public double Height;
-    public long StartTime = -1;
-    public long EndTime;
+    public long Time = -1;
     public eNoteDirection NoteDirection = eNoteDirection.none;
     public NoteData() {
 
     }
-
     public NoteData(NoteData noteParam) {
         ID = noteParam.ID;
         MusicID = noteParam.MusicID;
         Chord = noteParam.Chord;
         Height = noteParam.Height;
-        StartTime = noteParam.StartTime;
-        EndTime = noteParam.EndTime;
+        Time = noteParam.Time;
         NoteDirection = noteParam.NoteDirection;
     }
 
