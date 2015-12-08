@@ -244,16 +244,12 @@ public class MusicManager {
     }
 
     public void SendNoteToHarp(NoteData noteData) {
-        String strNote = String.valueOf(((char) (noteData.Chord + 'A')));
+        String strNote = "";
         if (noteData.NoteDirection == NoteData.eNoteDirection.Input) {
-            strNote += "i";
+            strNote = String.valueOf((noteData.Chord * 3) + noteData.GetDiscreteHeight() + 'A');
         } else if (noteData.NoteDirection == NoteData.eNoteDirection.Output) {
-            strNote += "o";
-        } else {
-            strNote += "n";
+            strNote = String.valueOf(noteData.Chord + '0');
         }
-        strNote += String.valueOf(noteData.Height);
-
         rmsService.SendToBluetooth(strNote + "\r\n");
     }
 
