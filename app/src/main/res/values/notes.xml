@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer-array name="acoustic_guitar_notes">
+    <integer-array name="all_notes">
         <item>@raw/acoustic_guitar_c3</item>
         <item>@raw/acoustic_guitar_cs3</item>
         <item>@raw/acoustic_guitar_d3</item>
@@ -25,8 +25,6 @@
         <item>@raw/acoustic_guitar_a4</item>
         <item>@raw/acoustic_guitar_as4</item>
         <item>@raw/acoustic_guitar_b4</item>
-    </integer-array>
-    <integer-array name="electric_piano_notes">
         <item>@raw/electric_piano_c4</item>
         <item>@raw/electric_piano_cs4</item>
         <item>@raw/electric_piano_d4</item>
@@ -51,8 +49,6 @@
         <item>@raw/electric_piano_a5</item>
         <item>@raw/electric_piano_as5</item>
         <item>@raw/electric_piano_b5</item>
-    </integer-array>
-    <integer-array name="synth_pluck_notes">
         <item>@raw/synth_pluck_c5</item>
         <item>@raw/synth_pluck_cs5</item>
         <item>@raw/synth_pluck_d5</item>
@@ -77,8 +73,6 @@
         <item>@raw/synth_pluck_a6</item>
         <item>@raw/synth_pluck_as6</item>
         <item>@raw/synth_pluck_b6</item>
-    </integer-array>
-    <integer-array name="trombone_notes">
         <item>@raw/trombone_c4</item>
         <item>@raw/trombone_cs4</item>
         <item>@raw/trombone_d4</item>
@@ -103,8 +97,6 @@
         <item>@raw/trombone_a5</item>
         <item>@raw/trombone_as5</item>
         <item>@raw/trombone_b5</item>
-    </integer-array>
-    <integer-array name="violin_notes">
         <item>@raw/violin_c5</item>
         <item>@raw/violin_cs5</item>
         <item>@raw/violin_d5</item>

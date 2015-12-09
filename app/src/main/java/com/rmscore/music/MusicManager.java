@@ -41,7 +41,9 @@ public class MusicManager {
     private long startMilliseconds;
     private ArrayList<String> instrumentsList = new ArrayList<>();
     private Timer playNoteTimer;
-    private MediaPlayer[][] mediaPlayer;
+    private MediaPlayer[] mediaPlayer;
+//    SoundPool spool;
+//    AudioAttributes audioAttributes;
 
     public MusicManager(RMSService rmsServiceParam) {
         rmsService = rmsServiceParam;
@@ -63,38 +65,27 @@ public class MusicManager {
     }
 
     public void LoadAllNotes() {
-        TypedArray notes;
+        TypedArray notes = rmsService.getResources().obtainTypedArray(R.array.all_notes);
 
-        mediaPlayer = new MediaPlayer[instrumentsList.size()][NUMBER_OF_NOTES];
+        mediaPlayer = new MediaPlayer[NUMBER_OF_NOTES * instrumentsList.size()];
 
-        for (int i = 0; i < instrumentsList.size(); i++) {
-            switch (i) {
-                case 0:
-                    notes = rmsService.getResources().obtainTypedArray(R.array.acoustic_guitar_notes);
-                    break;
-                case 1:
-                    notes = rmsService.getResources().obtainTypedArray(R.array.electric_piano_notes);
-                    break;
-                case 2:
-                    notes = rmsService.getResources().obtainTypedArray(R.array.synth_pluck_notes);
-                    break;
-                case 3:
-                    notes = rmsService.getResources().obtainTypedArray(R.array.trombone_notes);
-                    break;
-                case 4:
-                    notes = rmsService.getResources().obtainTypedArray(R.array.violin_notes);
-                    break;
-                default:
-                    notes = rmsService.getResources().obtainTypedArray(R.array.electric_piano_notes);
-                    break;
-            }
-
-            for (int j = 0; j < notes.length(); j++) {
-                this.mediaPlayer[i][j] = MediaPlayer.create(rmsService, notes.getResourceId(j, -1));
-            }
-
+        for (int j = 0; j < notes.length(); j++) {
+            mediaPlayer[j] = MediaPlayer.create(rmsService, notes.getResourceId(j, -1));
         }
 
+//        audioAttributes = new AudioAttributes.Builder()
+//                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+//                .setUsage(AudioAttributes.USAGE_GAME)
+//                .build();
+//
+//        spool = new SoundPool.Builder()
+//                .setMaxStreams(NUMBER_OF_NOTES)
+//                .setAudioAttributes(audioAttributes)
+//                .build();
+//
+//        for (int j = 0; j < notes.length(); j++) {
+//            spool.load(rmsService, notes.getResourceId(j, -1), 1);
+//        }
     }
 
     public void LoadInstrument(int instrumentParam) {
@@ -243,17 +234,18 @@ public class MusicManager {
         return (instrumentSelected == 2) || (instrumentSelected == 3) || (instrumentSelected == 4);
     }
 
-    private synchronized void playNote(NoteData noteData) {
+    private void playNote(NoteData noteData) {
         int note = (noteData.Chord * 3) + noteData.GetDiscreteHeight();
-        MediaPlayer mp = mediaPlayer[instrumentSelected][note];
-        mp.seekTo(0);
-        mp.start();
+        note += (instrumentSelected * NUMBER_OF_NOTES) + 1;
+        mediaPlayer[note].seekTo(0);
+        mediaPlayer[note].start();
+        //spool.play(note, 1, 1, 1, 0, 1);
         Log.d("LaserHarpists", "Instrument " + instrumentSelected + " note playing " + note);
     }
 
-    private synchronized void stopNote(NoteData noteData) {
-        mediaPlayer[instrumentSelected][(noteData.Chord * 3) + noteData.GetDiscreteHeight()].pause();
-        mediaPlayer[instrumentSelected][(noteData.Chord * 3) + noteData.GetDiscreteHeight()].release();
+    private void stopNote(NoteData noteData) {
+        //mediaPlayer[instrumentSelected][(noteData.Chord * 3) + noteData.GetDiscreteHeight()].pause();
+        //mediaPlayer[instrumentSelected][(noteData.Chord * 3) + noteData.GetDiscreteHeight()].release();
     }
 
     public synchronized void SendNoteToHarp(NoteData noteData) {
