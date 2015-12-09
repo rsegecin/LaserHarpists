@@ -21,12 +21,12 @@ import com.rmscore.bases.BaseActivity;
 import com.rmscore.controls.Chronometer;
 import com.rmscore.datamodels.MusicData;
 import com.rmscore.datamodels.NoteData;
-import com.rmscore.music.INoteReceiver;
+import com.rmscore.music.IMusicManager;
 import com.rmscore.utils.SimpleArrayAdapter;
 
 import java.util.ArrayList;
 
-public class FreeStyle extends BaseActivity implements INoteReceiver {
+public class FreeStyle extends BaseActivity implements IMusicManager {
 
     private ArrayList<MusicData> Musics = new ArrayList<>();
     private Spinner spinnerSoundType;
@@ -210,6 +210,13 @@ public class FreeStyle extends BaseActivity implements INoteReceiver {
             chronometer.reset();
         }
 
+    }
+
+    @Override
+    public void onMusicStopped() {
+        btnMusicAction.setText("Play");
+        ResetAllFrets();
+        chronometer.reset();
     }
 
     private void ResetAllFrets() {

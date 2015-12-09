@@ -12,12 +12,12 @@ import android.widget.TextView;
 import com.rmscore.bases.BaseActivity;
 import com.rmscore.datamodels.MusicData;
 import com.rmscore.datamodels.NoteData;
-import com.rmscore.music.INoteReceiver;
+import com.rmscore.music.IMusicManager;
 import com.rmscore.utils.SimpleArrayAdapter;
 
 import java.util.ArrayList;
 
-public class ScoreGame extends BaseActivity implements INoteReceiver {
+public class ScoreGame extends BaseActivity implements IMusicManager {
 
     private ArrayList<MusicData> musics = new ArrayList<>();
     private ArrayList<String> strMusics = new ArrayList<>();
@@ -155,6 +155,11 @@ public class ScoreGame extends BaseActivity implements INoteReceiver {
             }
         }
 
+    }
+
+    @Override
+    public void onMusicStopped() {
+        ResetAllFrets();
     }
 
     private void ResetAllFrets() {

@@ -59,7 +59,7 @@ public class NotesDataTable extends DBTable {
                 note.MusicID = Integer.valueOf(cursor.getString(1));
                 note.Chord = Integer.valueOf(cursor.getString(2));
                 note.Height = Double.valueOf(cursor.getString(3));
-                note.Time = Integer.valueOf(cursor.getString(4));
+                note.Time = Long.valueOf(cursor.getString(4));
                 note.NoteDirection = NoteData.eNoteDirection.values()[Integer.valueOf(cursor.getString(5))];
                 notes.add(note);
             } while (cursor.moveToNext());
