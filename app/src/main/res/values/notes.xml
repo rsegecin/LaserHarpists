@@ -121,6 +121,30 @@
         <item>@raw/violin_a6</item>
         <item>@raw/violin_as6</item>
         <item>@raw/violin_b6</item>
+        <item>@raw/battery_aro_caixa</item>
+        <item>@raw/battery_ataque1</item>
+        <item>@raw/battery_ataque2</item>
+        <item>@raw/battery_ataque3</item>
+        <item>@raw/battery_ataque4</item>
+        <item>@raw/battery_bumbo</item>
+        <item>@raw/battery_caixa</item>
+        <item>@raw/battery_chimbau_aberto</item>
+        <item>@raw/battery_chimbau_fechado</item>
+        <item>@raw/battery_chocalho</item>
+        <item>@raw/battery_clav01</item>
+        <item>@raw/battery_conducao</item>
+        <item>@raw/battery_cowbell</item>
+        <item>@raw/battery_palmas</item>
+        <item>@raw/battery_surdo1</item>
+        <item>@raw/battery_surdo2</item>
+        <item>@raw/battery_tom1</item>
+        <item>@raw/battery_tom2</item>
+        <item>@raw/battery_tom3</item>
+        <item>@raw/battery_tom4</item>
+        <item>@raw/battery_tom5</item>
+        <item>@raw/clap01</item>
+        <item>@raw/clap02</item>
+        <item>@raw/clap03</item>
     </integer-array>
 
 </resources>

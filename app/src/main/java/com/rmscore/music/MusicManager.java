@@ -59,6 +59,7 @@ public class MusicManager {
         instrumentsList.add("Synth Plunk");
         instrumentsList.add("Trombone");
         instrumentsList.add("Violin");
+        instrumentsList.add("Battery");
 
         LoadAllNotes();
         LoadInstrument(1);
